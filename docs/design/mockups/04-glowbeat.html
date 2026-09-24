@@ -1,0 +1,1521 @@
+<!doctype html>
+<html lang="en" class="gb"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glowbeat Party Mode - Glowbeat Design System</title>
+<style>
+/* =========================================================================
+   GLOWBEAT DESIGN SYSTEM - Colors, Type, Space, Radii, Shadows, Glass, Motion
+   -------------------------------------------------------------------------
+   A fusion of four sources:
+     1. MiniDisc UI       - hardware chassis, chrome strips, phosphor wells,
+                            pad-printed labels, VU meter language
+     2. PW-SEQ-1          - one accent and only one, step + edge-glow language,
+                            ticked slider tracks, readout chips,
+                            the chrome-vs-help type split
+     3. Apple Liquid Glass - translucent layered sheets, backdrop blur,
+                            specular top highlight, soft inner edge,
+                            concentric rounded rectangles
+     4. Native SwiftUI mac - segmented pickers, switches, real slider thumbs,
+                            disclosure groups, secondary captions, SF Pro
+
+   HARD RULE: no dots. No LED dots, no dotted grids, no round status pips,
+   no dotted separators, no halftone or polka textures, no dot page
+   indicators, no circular LEDs. Every indicator is a bar, a segment, an
+   underline, an edge glow, or a filled rounded rectangle. Slider thumbs and
+   switch knobs may be rounded, but they are knobs you grab, never indicators.
+
+   Dark is the default theme. Glowbeat runs in dim rooms while the bulbs it
+   drives are the brightest thing in the space, so the panel stays quiet.
+   Light is a supported override, not the design target.
+   ========================================================================= */
+
+:root {
+  color-scheme: dark light;
+
+  /* ---------------------------------------------------------------------
+     1. CHASSIS AND SURFACES (opaque, dark first)
+     The chassis is the body of the instrument. It is never translucent.
+     --------------------------------------------------------------------- */
+  --gb-void:          #08080b;   /* the room behind the device */
+  --gb-chassis-top:   #23232b;   /* chassis gradient, lit edge */
+  --gb-chassis-mid:   #1a1a21;
+  --gb-chassis-bot:   #101015;   /* chassis gradient, shadow edge */
+  --gb-surface:       #1c1c23;   /* raised control cap */
+  --gb-surface-hi:    #26262f;   /* hover / selected cap */
+  --gb-surface-lo:    #151519;   /* pressed cap */
+  --gb-tray:          #0c0c10;   /* recessed tray a control sits in */
+  --gb-well:          #08080c;   /* recessed well: readouts, meters */
+  --gb-well-deep:     #05050a;   /* phosphor well floor */
+
+  --gb-hairline:        rgba(255, 255, 255, 0.07);
+  --gb-hairline-strong: rgba(255, 255, 255, 0.13);
+  --gb-shade:           rgba(0, 0, 0, 0.55);
+
+  /* ---------------------------------------------------------------------
+     2. CHROME (the polished metal strip, straight from MiniDisc)
+     --------------------------------------------------------------------- */
+  --gb-chrome: linear-gradient(180deg,
+      #eceef2 0%, #f7f8fa 8%, #a8acb4 22%,
+      #4e5158 46%, #5c6067 56%, #b0b4bc 76%,
+      #dfe2e7 91%, #f2f3f6 100%);
+  --gb-chrome-thin: linear-gradient(180deg,
+      rgba(255,255,255,.55) 0%, rgba(255,255,255,.14) 40%,
+      rgba(0,0,0,.34) 60%, rgba(255,255,255,.28) 100%);
+
+  /* ---------------------------------------------------------------------
+     3. ACCENT - exactly one (the SEQ-1 discipline, a Glowbeat hue)
+     Violet reads as stage light, stays out of the way of the bulb palettes,
+     and is the only color allowed to mean "this is on / this is selected".
+     --------------------------------------------------------------------- */
+  --gb-accent:        #8b5cff;   /* strokes, bars, edge glows, marker */
+  --gb-accent-hi:     #a98aff;   /* hover / lit edge */
+  --gb-accent-fill:   #6f3dff;   /* filled controls that carry white text */
+  --gb-accent-on:     #ffffff;   /* text on --gb-accent-fill (5.4:1) */
+  --gb-accent-soft:   rgba(139, 92, 255, 0.16);
+  --gb-accent-line:   rgba(139, 92, 255, 0.45);
+  --gb-accent-wash:   rgba(139, 92, 255, 0.07);
+
+  /* ---------------------------------------------------------------------
+     4. SIGNAL - meter states only. Never decoration, never a brand color.
+     --------------------------------------------------------------------- */
+  --gb-signal-rest:  #8b5cff;   /* level below the trigger marker */
+  --gb-signal-live:  #ffb020;   /* level above the marker: lights are firing */
+  --gb-signal-peak:  #ff5a52;   /* the top of the scale */
+  --gb-signal-off:   rgba(255, 255, 255, 0.055); /* unlit segment */
+
+  /* ---------------------------------------------------------------------
+     5. PHOSPHOR - readout wells keep their own green, as on the hardware.
+     --------------------------------------------------------------------- */
+  --gb-phosphor:      #9df7c8;
+  --gb-phosphor-dim:  #2f5647;
+  --gb-phosphor-glow: 0 0 8px rgba(122, 240, 185, 0.55),
+                      0 0 22px rgba(122, 240, 185, 0.22);
+
+  /* ---------------------------------------------------------------------
+     6. TEXT
+     --------------------------------------------------------------------- */
+  --gb-fg-1: #f1f1f5;   /* primary */
+  --gb-fg-2: #a5a5b0;   /* secondary, captions */
+  --gb-fg-3: #7e7e89;   /* micro chrome, disabled labels (4.6:1 on chassis) */
+
+  /* ---------------------------------------------------------------------
+     7. GLASS MATERIALS (Liquid Glass)
+     A glass sheet has four parts, always applied together:
+       fill       - a low-opacity white or black wash
+       blur       - backdrop-filter, blur + saturate so it picks up color
+       specular   - a 1px inset highlight on the top edge only
+       inner edge - a 0.5px inset ring so the sheet has a defined boundary
+     Never stack glass on glass. Two layers maximum on any screen.
+     --------------------------------------------------------------------- */
+  --gb-glass-fill:      rgba(255, 255, 255, 0.055);
+  --gb-glass-fill-hi:   rgba(255, 255, 255, 0.09);
+  --gb-glass-fill-lo:   rgba(255, 255, 255, 0.03);
+  --gb-glass-blur:      blur(26px) saturate(175%);
+  --gb-glass-blur-thin: blur(14px) saturate(150%);
+  --gb-glass-specular:  inset 0 1px 0 rgba(255, 255, 255, 0.20);
+  --gb-glass-edge:      inset 0 0 0 0.5px rgba(255, 255, 255, 0.11);
+  --gb-glass-shadow:    0 1px 2px rgba(0, 0, 0, 0.42),
+                        0 14px 34px -10px rgba(0, 0, 0, 0.66);
+
+  /* ---------------------------------------------------------------------
+     8. SHADOWS - layered and transparent. Depth comes from shadows,
+        not from solid borders. Borders are for dividers only.
+     --------------------------------------------------------------------- */
+  --gb-ring:        0 0 0 1px rgba(255, 255, 255, 0.08);
+  --gb-ring-hi:     0 0 0 1px rgba(255, 255, 255, 0.14);
+
+  --gb-shadow-1:    0 0 0 1px rgba(255, 255, 255, 0.06),
+                    0 1px 2px -1px rgba(0, 0, 0, 0.55);
+  --gb-shadow-2:    0 0 0 1px rgba(255, 255, 255, 0.07),
+                    0 2px 5px -2px rgba(0, 0, 0, 0.55),
+                    0 8px 20px -8px rgba(0, 0, 0, 0.50);
+  --gb-shadow-3:    0 0 0 1px rgba(255, 255, 255, 0.08),
+                    0 4px 10px -3px rgba(0, 0, 0, 0.60),
+                    0 18px 44px -14px rgba(0, 0, 0, 0.70);
+
+  /* raised cap: molded plastic catching overhead light */
+  --gb-cap:         inset 0 1px 0 rgba(255, 255, 255, 0.12),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+                    0 1px 2px rgba(0, 0, 0, 0.50),
+                    0 3px 8px -3px rgba(0, 0, 0, 0.45);
+  --gb-cap-press:   inset 0 2px 4px rgba(0, 0, 0, 0.55),
+                    inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+
+  /* recessed well: a hole cut into the chassis */
+  --gb-well-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.72),
+                    inset 0 0 0 1px rgba(0, 0, 0, 0.60),
+                    0 1px 0 rgba(255, 255, 255, 0.055);
+
+  --gb-chassis-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10),
+                    inset 0 0 44px rgba(0, 0, 0, 0.45),
+                    0 0 0 1px rgba(0, 0, 0, 0.85),
+                    0 10px 26px -10px rgba(0, 0, 0, 0.65),
+                    0 34px 70px -22px rgba(0, 0, 0, 0.85);
+
+  /* edge glows - the replacement for every LED that used to be a dot */
+  --gb-glow-accent: 0 0 10px rgba(139, 92, 255, 0.60),
+                    0 0 26px rgba(139, 92, 255, 0.22);
+  --gb-glow-live:   0 0 9px rgba(255, 176, 32, 0.60);
+  --gb-glow-peak:   0 0 9px rgba(255, 90, 82, 0.60);
+
+  --gb-focus:       0 0 0 2px var(--gb-void), 0 0 0 4px var(--gb-accent);
+
+  /* ---------------------------------------------------------------------
+     9. RADII - concentric. outer = inner + padding.
+        4 -> 6 -> 8 -> 12 -> 16 -> 20 -> 24. Never invent a value between them.
+        Worked pairs used across this system:
+          tray      padding  4 -> outer 12, step    8  (12 =  8 +  4)
+          segmented padding  2 -> outer  8, sled    6  ( 8 =  6 +  2)
+          meter     padding  5 -> outer  8, segment 3  ( 8 =  3 +  5)
+          swatch    padding  4 -> outer  8, bar     4  ( 8 =  4 +  4)
+          switch    inset    2 -> outer  8, knob    6  ( 8 =  6 +  2)
+          glass     padding 16 -> outer 24, meter/readout 8 (24 = 8 + 16)
+          shell     padding  0 -> outer 20, strips full bleed
+        When padding exceeds 24px the layers read as separate surfaces:
+        pick each radius on its own instead of forcing the math.
+     --------------------------------------------------------------------- */
+  --gb-r-1: 4px;
+  --gb-r-2: 6px;
+  --gb-r-3: 8px;
+  --gb-r-4: 12px;
+  --gb-r-5: 16px;
+  --gb-r-6: 20px;
+  --gb-r-7: 24px;
+  --gb-r-knob: 7px;   /* pill knobs and thumbs */
+
+  /* ---------------------------------------------------------------------
+     10. SPACING - 4px base
+     --------------------------------------------------------------------- */
+  --gb-s-1:  4px;
+  --gb-s-2:  6px;
+  --gb-s-3:  8px;
+  --gb-s-4: 12px;
+  --gb-s-5: 16px;
+  --gb-s-6: 20px;
+  --gb-s-7: 24px;
+  --gb-s-8: 32px;
+  --gb-s-9: 44px;
+
+  /* minimum hit area for any interactive element */
+  --gb-hit: 40px;
+
+  /* ---------------------------------------------------------------------
+     11. TYPE - system faces only. No embedded font files.
+     --------------------------------------------------------------------- */
+  --gb-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+                  "SF Pro Display", system-ui, "Helvetica Neue", sans-serif;
+  --gb-font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo,
+                  "Cascadia Mono", monospace;
+
+  /* the ladder has deliberate gaps: 26 / 17 / 15 / 13 / 12.5 / 11 / 9.5 */
+  --gb-t-readout:  26px;   /* phosphor well numerals */
+  --gb-t-title:    17px;   /* panel title, one per panel */
+  --gb-t-heading:  15px;   /* group heading */
+  --gb-t-value:    13px;   /* inline numbers, mono, tabular */
+  --gb-t-body:     13px;   /* sentences a person reads */
+  --gb-t-caption: 12.5px;  /* help text under a control */
+  --gb-t-chrome:   11px;   /* mono caps: section titles, button labels */
+  --gb-t-micro:   9.5px;   /* scale ends, dense chips */
+
+  /* ---------------------------------------------------------------------
+     12. MOTION - one easing curve for the whole system.
+     --------------------------------------------------------------------- */
+  --gb-ease:      cubic-bezier(0.2, 0, 0, 1);
+  --gb-dur-press: 120ms;   /* scale on press */
+  --gb-dur-fast:  160ms;   /* hover, color, shadow */
+  --gb-dur-base:  240ms;   /* selection moves, glow rises */
+  --gb-dur-slow:  340ms;   /* disclosure opens, sheet enters */
+}
+
+/* =========================================================================
+   LIGHT MODE
+   Daylight chassis: brushed aluminum instead of graphite, ink text, the same
+   violet accent. Readout wells and the level meter housing stay dark, exactly
+   as a real front panel does, because phosphor and lit segments need a dark
+   floor to read as light rather than as paint.
+   ========================================================================= */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --gb-void:        #e7e7ec;
+    --gb-chassis-top: #ffffff;
+    --gb-chassis-mid: #f3f3f7;
+    --gb-chassis-bot: #dcdce3;
+    --gb-surface:     #ffffff;
+    --gb-surface-hi:  #f4f4f8;
+    --gb-surface-lo:  #e4e4ea;
+    --gb-tray:        #dfdfe6;
+    --gb-well:        #0a0a0e;      /* stays dark on purpose */
+    --gb-well-deep:   #06060a;
+
+    --gb-hairline:        rgba(0, 0, 0, 0.09);
+    --gb-hairline-strong: rgba(0, 0, 0, 0.16);
+    --gb-shade:           rgba(0, 0, 0, 0.10);
+
+    --gb-fg-1: #17171c;
+    --gb-fg-2: #55555f;
+    --gb-fg-3: #6e6e79;
+
+    --gb-accent:      #6f3dff;
+    --gb-accent-hi:   #5a28f0;
+    --gb-accent-fill: #6f3dff;
+    --gb-accent-soft: rgba(111, 61, 255, 0.12);
+    --gb-accent-line: rgba(111, 61, 255, 0.40);
+    --gb-accent-wash: rgba(111, 61, 255, 0.05);
+
+    --gb-glass-fill:     rgba(255, 255, 255, 0.62);
+    --gb-glass-fill-hi:  rgba(255, 255, 255, 0.78);
+    --gb-glass-fill-lo:  rgba(255, 255, 255, 0.45);
+    --gb-glass-blur:     blur(24px) saturate(185%);
+    --gb-glass-specular: inset 0 1px 0 rgba(255, 255, 255, 0.90);
+    --gb-glass-edge:     inset 0 0 0 0.5px rgba(0, 0, 0, 0.10);
+    --gb-glass-shadow:   0 1px 2px rgba(20, 16, 40, 0.10),
+                         0 12px 28px -10px rgba(20, 16, 40, 0.18);
+
+    --gb-ring:     0 0 0 1px rgba(0, 0, 0, 0.09);
+    --gb-ring-hi:  0 0 0 1px rgba(0, 0, 0, 0.16);
+    --gb-shadow-1: 0 0 0 1px rgba(0, 0, 0, 0.07),
+                   0 1px 2px -1px rgba(20, 16, 40, 0.14);
+    --gb-shadow-2: 0 0 0 1px rgba(0, 0, 0, 0.07),
+                   0 2px 5px -2px rgba(20, 16, 40, 0.16),
+                   0 8px 18px -8px rgba(20, 16, 40, 0.14);
+    --gb-shadow-3: 0 0 0 1px rgba(0, 0, 0, 0.08),
+                   0 4px 10px -3px rgba(20, 16, 40, 0.18),
+                   0 18px 40px -14px rgba(20, 16, 40, 0.20);
+    --gb-cap:      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+                   inset 0 -1px 0 rgba(0, 0, 0, 0.07),
+                   0 1px 2px rgba(20, 16, 40, 0.14),
+                   0 3px 8px -3px rgba(20, 16, 40, 0.12);
+    --gb-cap-press: inset 0 2px 4px rgba(20, 16, 40, 0.18);
+    --gb-well-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.60),
+                      inset 0 0 0 1px rgba(0, 0, 0, 0.45),
+                      0 1px 0 rgba(255, 255, 255, 0.80);
+    --gb-chassis-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95),
+                      0 0 0 1px rgba(0, 0, 0, 0.10),
+                      0 10px 24px -10px rgba(20, 16, 40, 0.22),
+                      0 30px 60px -24px rgba(20, 16, 40, 0.26);
+    --gb-focus:    0 0 0 2px var(--gb-chassis-top), 0 0 0 4px var(--gb-accent);
+    --gb-signal-off: rgba(255, 255, 255, 0.07);
+  }
+}
+
+/* Explicit opt-in light, for a future in-app appearance toggle. */
+:root[data-theme="light"] {
+  --gb-void:        #e7e7ec;
+  --gb-chassis-top: #ffffff;
+  --gb-chassis-mid: #f3f3f7;
+  --gb-chassis-bot: #dcdce3;
+  --gb-surface:     #ffffff;
+  --gb-surface-hi:  #f4f4f8;
+  --gb-surface-lo:  #e4e4ea;
+  --gb-tray:        #dfdfe6;
+  --gb-well:        #0a0a0e;
+  --gb-well-deep:   #06060a;
+  --gb-hairline:        rgba(0, 0, 0, 0.09);
+  --gb-hairline-strong: rgba(0, 0, 0, 0.16);
+  --gb-shade:           rgba(0, 0, 0, 0.10);
+  --gb-fg-1: #17171c;
+  --gb-fg-2: #55555f;
+  --gb-fg-3: #6e6e79;
+  --gb-accent:      #6f3dff;
+  --gb-accent-hi:   #5a28f0;
+  --gb-accent-fill: #6f3dff;
+  --gb-accent-soft: rgba(111, 61, 255, 0.12);
+  --gb-accent-line: rgba(111, 61, 255, 0.40);
+  --gb-accent-wash: rgba(111, 61, 255, 0.05);
+  --gb-glass-fill:     rgba(255, 255, 255, 0.62);
+  --gb-glass-fill-hi:  rgba(255, 255, 255, 0.78);
+  --gb-glass-fill-lo:  rgba(255, 255, 255, 0.45);
+  --gb-glass-blur:     blur(24px) saturate(185%);
+  --gb-glass-specular: inset 0 1px 0 rgba(255, 255, 255, 0.90);
+  --gb-glass-edge:     inset 0 0 0 0.5px rgba(0, 0, 0, 0.10);
+  --gb-glass-shadow:   0 1px 2px rgba(20, 16, 40, 0.10),
+                       0 12px 28px -10px rgba(20, 16, 40, 0.18);
+  --gb-ring:     0 0 0 1px rgba(0, 0, 0, 0.09);
+  --gb-ring-hi:  0 0 0 1px rgba(0, 0, 0, 0.16);
+  --gb-shadow-1: 0 0 0 1px rgba(0, 0, 0, 0.07),
+                 0 1px 2px -1px rgba(20, 16, 40, 0.14);
+  --gb-shadow-2: 0 0 0 1px rgba(0, 0, 0, 0.07),
+                 0 2px 5px -2px rgba(20, 16, 40, 0.16),
+                 0 8px 18px -8px rgba(20, 16, 40, 0.14);
+  --gb-shadow-3: 0 0 0 1px rgba(0, 0, 0, 0.08),
+                 0 4px 10px -3px rgba(20, 16, 40, 0.18),
+                 0 18px 40px -14px rgba(20, 16, 40, 0.20);
+  --gb-cap:      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+                 inset 0 -1px 0 rgba(0, 0, 0, 0.07),
+                 0 1px 2px rgba(20, 16, 40, 0.14),
+                 0 3px 8px -3px rgba(20, 16, 40, 0.12);
+  --gb-cap-press: inset 0 2px 4px rgba(20, 16, 40, 0.18);
+  --gb-well-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.60),
+                    inset 0 0 0 1px rgba(0, 0, 0, 0.45),
+                    0 1px 0 rgba(255, 255, 255, 0.80);
+  --gb-chassis-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95),
+                    0 0 0 1px rgba(0, 0, 0, 0.10),
+                    0 10px 24px -10px rgba(20, 16, 40, 0.22),
+                    0 30px 60px -24px rgba(20, 16, 40, 0.26);
+  --gb-focus:    0 0 0 2px var(--gb-chassis-top), 0 0 0 4px var(--gb-accent);
+  --gb-signal-off: rgba(255, 255, 255, 0.07);
+}
+
+/* =========================================================================
+   ROOT RENDERING
+   ========================================================================= */
+html.gb, .gb {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: var(--gb-font-sans);
+  color: var(--gb-fg-1);
+}
+
+.gb img,
+.gb-img {
+  outline: 1px solid rgba(255, 255, 255, 0.10);
+  outline-offset: -1px;
+  max-width: 100%;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .gb img,
+  :root:not([data-theme="dark"]) .gb-img { outline-color: rgba(0, 0, 0, 0.10); }
+}
+
+/* =========================================================================
+   TYPE CLASSES
+   Every run of text is one of these. Never free-type a size.
+
+   The split, inherited from PW-SEQ-1 v2 and kept honest here:
+     mono + uppercase  = chrome. Labels the panel prints on itself.
+     sans + sentence   = language. Anything a person reads as a sentence.
+     mono + tabular    = numbers. Anything that changes while you watch it.
+   ========================================================================= */
+
+/* Phosphor readout, inside a well. Numerals only. */
+.gb-readout-text {
+  font-family: var(--gb-font-mono);
+  font-size: var(--gb-t-readout);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--gb-phosphor);
+  text-shadow: var(--gb-phosphor-glow);
+}
+
+/* Panel title. One per panel. */
+.gb-title {
+  font-family: var(--gb-font-sans);
+  font-size: var(--gb-t-title);
+  font-weight: 640;
+  letter-spacing: -0.012em;
+  line-height: 1.25;
+  color: var(--gb-fg-1);
+  text-wrap: balance;
+}
+
+/* Group heading. */
+.gb-heading {
+  font-family: var(--gb-font-sans);
+  font-size: var(--gb-t-heading);
+  font-weight: 600;
+  letter-spacing: -0.008em;
+  line-height: 1.3;
+  color: var(--gb-fg-1);
+  text-wrap: balance;
+}
+
+/* Chrome label. Mono caps. Section titles, segment labels, readout captions. */
+.gb-chrome-label {
+  font-family: var(--gb-font-mono);
+  font-size: var(--gb-t-chrome);
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--gb-fg-2);
+}
+
+/* Pad-printed label. Sans caps, tight tracking, faintly embossed.
+   Used for the name silkscreened beside a physical control. */
+.gb-printed {
+  font-family: var(--gb-font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--gb-fg-3);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.06),
+               0 -1px 0 rgba(0, 0, 0, 0.45);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .gb-printed { text-shadow: 0 1px 0 rgba(255,255,255,0.9); }
+}
+
+/* Inline numeric value. Always tabular so columns never jitter. */
+.gb-value {
+  font-family: var(--gb-font-mono);
+  font-size: var(--gb-t-value);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.005em;
+  color: var(--gb-fg-1);
+}
+
+/* Body. Sentences a person reads. */
+.gb-body {
+  font-family: var(--gb-font-sans);
+  font-size: var(--gb-t-body);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--gb-fg-1);
+  text-wrap: pretty;
+  max-width: 68ch;
+}
+
+/* Caption. Help text under a control. The SwiftUI secondary caption. */
+.gb-caption {
+  font-family: var(--gb-font-sans);
+  font-size: var(--gb-t-caption);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--gb-fg-2);
+  text-wrap: pretty;
+  max-width: 62ch;
+}
+
+/* Micro chrome. Scale ends, dense chips. Tabular: scale ends and status
+   strings carry counts that change while you watch them. */
+.gb-micro {
+  font-family: var(--gb-font-mono);
+  font-size: var(--gb-t-micro);
+  font-weight: 500;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--gb-fg-3);
+}
+
+.gb-tabular { font-variant-numeric: tabular-nums; }
+
+
+/* =========================================================================
+   GLOWBEAT DESIGN SYSTEM - Components
+   Load after colors_and_type.css.
+
+   Every class is prefixed .gb-. Every interactive element gets:
+     - a 40x40 minimum hit area (extended with ::after where the visible
+       control is smaller)
+     - scale(0.96) on press
+     - explicit transition-property (never `transition: all`)
+     - a visible focus ring
+
+   NO DOTS. Indicators are bars, segments, underlines, edge glows, or filled
+   rounded rectangles. border-radius: 50% appears nowhere in this file.
+   ========================================================================= */
+
+.gb, .gb *, .gb *::before, .gb *::after { box-sizing: border-box; }
+
+/* -------------------------------------------------------------------------
+   1. SHELL / CHASSIS - the opaque body of the instrument
+   ------------------------------------------------------------------------- */
+.gb-shell {
+  position: relative;
+  border-radius: var(--gb-r-6);
+  overflow: hidden;
+  box-shadow: var(--gb-chassis-shadow);
+  background:
+    radial-gradient(ellipse 120% 60% at 62% 0%, rgba(255,255,255,0.045) 0%, transparent 62%),
+    linear-gradient(172deg,
+      var(--gb-chassis-top) 0%,
+      var(--gb-chassis-mid) 26%,
+      var(--gb-chassis-bot) 58%,
+      var(--gb-chassis-mid) 84%,
+      var(--gb-chassis-top) 100%);
+  isolation: isolate;
+}
+
+/* The lit crown: a faint accent bloom across the top of the chassis,
+   as if the bulbs the app is driving are washing the panel. */
+.gb-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 180px;
+  pointer-events: none;
+  background: radial-gradient(ellipse 70% 100% at 50% 0%,
+    var(--gb-accent-wash) 0%, transparent 72%);
+}
+
+.gb-shell-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--gb-s-3);
+  padding: 11px var(--gb-s-5);
+  background: linear-gradient(180deg,
+    rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.015) 55%, rgba(0,0,0,0.10) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.09),
+              0 1px 0 rgba(0,0,0,0.45);
+}
+
+.gb-shell-body { position: relative; padding: var(--gb-s-6) var(--gb-s-7) var(--gb-s-5); }
+
+/* Footer tray: recessed strip at the bottom of the chassis. */
+.gb-shell-foot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--gb-s-3);
+  padding: 12px var(--gb-s-7) 14px;
+  background: var(--gb-tray);
+  box-shadow: inset 0 3px 7px rgba(0,0,0,0.65), 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* -------------------------------------------------------------------------
+   2. CHROME STRIP - the polished metal seam. A divider, not a decoration:
+      it marks where the chassis is physically joined.
+   ------------------------------------------------------------------------- */
+.gb-chrome-strip { height: 4px; background: var(--gb-chrome); }
+.gb-chrome-strip.gb-thin { height: 2px; background: var(--gb-chrome-thin); }
+
+/* -------------------------------------------------------------------------
+   3. GLASS CARD - a translucent sheet floating over the chassis.
+      Use for modules that should pick up the color behind them.
+      Never for a well, never nested inside another glass card.
+   ------------------------------------------------------------------------- */
+/* Concentric: padding 16, outer 24, inner 8 (meter housing, readout well).
+   24 = 8 + 16. */
+.gb-glass {
+  position: relative;
+  border-radius: var(--gb-r-7);
+  padding: var(--gb-s-5);
+  background: var(--gb-glass-fill);
+  -webkit-backdrop-filter: var(--gb-glass-blur);
+  backdrop-filter: var(--gb-glass-blur);
+  box-shadow: var(--gb-glass-specular), var(--gb-glass-edge), var(--gb-glass-shadow);
+  transition-property: background-color, box-shadow;
+  transition-duration: var(--gb-dur-fast);
+  transition-timing-function: var(--gb-ease);
+}
+.gb-glass.gb-thin {
+  -webkit-backdrop-filter: var(--gb-glass-blur-thin);
+  backdrop-filter: var(--gb-glass-blur-thin);
+  background: var(--gb-glass-fill-lo);
+}
+.gb-glass.gb-raised { box-shadow: var(--gb-glass-specular), var(--gb-glass-edge), var(--gb-shadow-3); }
+
+/* Glass card that is the focus of the panel: the accent edge lights up. */
+.gb-glass.gb-primed {
+  background: linear-gradient(180deg, var(--gb-accent-wash), transparent 62%), var(--gb-glass-fill-hi);
+  box-shadow:
+    var(--gb-glass-specular),
+    inset 0 0 0 0.5px var(--gb-accent-line),
+    0 0 0 1px rgba(0,0,0,0.30),
+    0 16px 40px -12px rgba(0,0,0,0.65),
+    0 0 34px -6px rgba(139,92,255,0.22);
+}
+
+/* -------------------------------------------------------------------------
+   4. SECTION - a titled block inside the shell.
+      The section title is anchored by a 2x11 accent BAR, not a dot.
+   ------------------------------------------------------------------------- */
+.gb-section { padding: var(--gb-s-5) 0; border-top: 1px solid var(--gb-hairline); }
+.gb-section:first-child { border-top: 0; padding-top: 0; }
+
+.gb-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gb-s-4);
+  margin-bottom: var(--gb-s-4);
+}
+
+.gb-section-title { display: inline-flex; align-items: center; gap: 9px; }
+.gb-section-title::before {
+  content: "";
+  width: 2px;
+  height: 11px;
+  border-radius: 1px;
+  background: var(--gb-accent);
+  box-shadow: var(--gb-glow-accent);
+  flex-shrink: 0;
+}
+.gb-section-title > span {
+  font-family: var(--gb-font-mono);
+  font-size: var(--gb-t-chrome);
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--gb-fg-1);
+}
+
+/* Control row: printed label, control, readout. */
+.gb-row { display: flex; align-items: center; gap: var(--gb-s-4); min-height: 34px; }
+.gb-row > .gb-printed { width: 74px; flex-shrink: 0; }
+.gb-stack { display: flex; flex-direction: column; gap: var(--gb-s-5); }
+.gb-rule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--gb-hairline-strong), transparent); }
+
+/* -------------------------------------------------------------------------
+   5. SEGMENTED PICKER - native macOS. A recessed track holding a raised sled.
+      Concentric: track padding 2, track radius 8, sled radius 6.
+   ------------------------------------------------------------------------- */
+.gb-segmented {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  border-radius: var(--gb-r-3);
+  background: var(--gb-tray);
+  box-shadow: var(--gb-well-shadow);
+}
+.gb-segmented > button {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  min-height: 26px;
+  padding: 0 14px;
+  border-radius: var(--gb-r-2);
+  background: transparent;
+  color: var(--gb-fg-2);
+  font-family: var(--gb-font-sans);
+  font-size: 12px;
+  font-weight: 560;
+  letter-spacing: -0.005em;
+  position: relative;
+  transition-property: color, background-color, box-shadow, scale;
+  transition-duration: var(--gb-dur-fast);
+  transition-timing-function: var(--gb-ease);
+}
+.gb-segmented > button::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;              /* never wider than the button: hit areas must not collide */
+  height: var(--gb-hit);
+}
+.gb-segmented > button:hover { color: var(--gb-fg-1); }
+.gb-segmented > button:active { scale: 0.96; }
+.gb-segmented > button:focus-visible { outline: none; box-shadow: var(--gb-focus); }
+.gb-segmented > button[aria-selected="true"],
+.gb-segmented > button.gb-on {
+  color: var(--gb-fg-1);
+  background: var(--gb-surface-hi);
+  box-shadow: var(--gb-cap);
+}
+
+/* -------------------------------------------------------------------------
+   6. STEP BUTTONS - the SEQ-1 step, with its LED replaced by an EDGE BAR.
+      Concentric: tray padding 4, tray radius 12, step radius 8.
+   ------------------------------------------------------------------------- */
+.gb-steps {
+  display: flex;
+  gap: var(--gb-s-1);
+  padding: var(--gb-s-1);
+  border-radius: var(--gb-r-4);
+  background: var(--gb-tray);
+  box-shadow: var(--gb-well-shadow);
+}
+.gb-step {
+  flex: 1;
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  position: relative;
+  min-height: 54px;
+  padding: 0 0 9px;
+  border-radius: var(--gb-r-3);
+  background: linear-gradient(180deg, var(--gb-surface-hi) 0%, var(--gb-surface) 55%, var(--gb-surface-lo) 100%);
+  box-shadow: var(--gb-cap);
+  color: var(--gb-fg-2);
+  font-family: var(--gb-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+  transition-property: color, background-color, box-shadow, scale;
+  transition-duration: var(--gb-dur-fast);
+  transition-timing-function: var(--gb-ease);
+}
+/* the indicator: a bar seated in the top inside edge of the cap */
+.gb-step::before {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 38%;
+  height: 3px;
+  border-radius: 1.5px;
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
+  transition-property: background-color, box-shadow, width;
+  transition-duration: var(--gb-dur-base);
+  transition-timing-function: var(--gb-ease);
+}
+/* on a light cap the indicator bar has to darken, not lighten */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .gb-step::before {
+    background: rgba(0, 0, 0, 0.16);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.12);
+  }
+}
+:root[data-theme="light"] .gb-step::before {
+  background: rgba(0, 0, 0, 0.16);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.12);
+}
+.gb-step:hover { color: var(--gb-fg-1); background: linear-gradient(180deg, var(--gb-surface-hi), var(--gb-surface)); }
+.gb-step:active { scale: 0.96; box-shadow: var(--gb-cap-press); }
+.gb-step:focus-visible { outline: none; box-shadow: var(--gb-cap), var(--gb-focus); }
+.gb-step.gb-on {
+  color: var(--gb-fg-1);
+  background: linear-gradient(180deg, var(--gb-surface-hi) 0%, var(--gb-surface) 100%);
+  box-shadow: var(--gb-cap), inset 0 0 0 1px var(--gb-accent-line), inset 0 0 20px -6px var(--gb-accent);
+}
+.gb-step.gb-on::before {
+  width: 56%;
+  background: var(--gb-accent);
+  box-shadow: var(--gb-glow-accent);
+}
+
+/* -------------------------------------------------------------------------
+   7. SWITCH and CHECKBOX
+      The switch knob is a PILL, not a circle: you can tell it is a thing you
+      slide, and it is never mistaken for a status light.
+   ------------------------------------------------------------------------- */
+.gb-switch { display: inline-flex; align-items: center; cursor: pointer; position: relative; }
+.gb-switch input { position: absolute; opacity: 0; pointer-events: none; }
+.gb-switch .gb-track {
+  position: relative;
+  width: 44px; height: 26px;
+  border-radius: var(--gb-r-3);
+  background: var(--gb-tray);
+  box-shadow: var(--gb-well-shadow);
+  flex-shrink: 0;
+  transition-property: background-color, box-shadow;
+  transition-duration: var(--gb-dur-base);
+  transition-timing-function: var(--gb-ease);
+}
+.gb-switch .gb-track::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: var(--gb-hit); height: var(--gb-hit);
+}
+/* Concentric: track inset 2, track radius 8, knob radius 6. 8 = 6 + 2. */
+.gb-switch .gb-knob {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 22px; height: 22px;
+  border-radius: var(--gb-r-2);
+  background: linear-gradient(180deg, #f4f5f8 0%, #c9ccd4 58%, #b3b6be 100%);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.7);
+  transition-property: translate, background-color;
+  transition-duration: var(--gb-dur-base);
+  transition-timing-function: var(--gb-ease);
+}
+.gb-switch input:checked ~ .gb-track {
+  background: linear-gradient(180deg, var(--gb-accent-hi), var(--gb-accent-fill));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -1px 0 rgba(0,0,0,0.25),
+              0 0 0 1px rgba(0,0,0,0.35), var(--gb-glow-accent);
+}
+.gb-switch input:checked ~ .gb-track .gb-knob { translate: 18px 0; background: linear-gradient(180deg, #ffffff, #dcdee5); }
+.gb-switch input:focus-visible ~ .gb-track { box-shadow: var(--gb-focus); }
+.gb-switch:active .gb-knob { scale: 0.96; }
+
+.gb-check { display: inline-flex; align-items: flex-start; gap: 11px; cursor: pointer; position: relative; }
+.gb-check input { position: absolute; opacity: 0; pointer-events: none; }
+.gb-check .gb-box {
+  position: relative;
+  width: 18px; height: 18px;
+  margin-top: 1px;
+  flex-shrink: 0;
+  border-radius: var(--gb-r-2);
+  background: var(--gb-tray);
+  box-shadow: var(--gb-well-shadow);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition-property: background-color, box-shadow, scale;
+  transition-duration: var(--gb-dur-fast);
+  transition-timing-function: var(--gb-ease);
+}
+.gb-check .gb-box::before {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: var(--gb-hit); height: var(--gb-hit);
+}
+.gb-check .gb-box::after {
+  content: "";
+  width: 9px; height: 5px;
+  margin-top: -2px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  rotate: -45deg;
+  opacity: 0;
+  scale: 0.25;
+  filter: blur(4px);
+  transition-property: opacity, scale, filter;
+  transition-duration: var(--gb-dur-base);
+  transition-timing-function: var(--gb-ease);
+}
+.gb-check input:checked ~ .gb-box {
+  background: linear-gradient(180deg, var(--gb-accent-hi), var(--gb-accent-fill));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 0 0 1px rgba(0,0,0,0.35), var(--gb-glow-accent);
+}
+.gb-check input:checked ~ .gb-box::after { opacity: 1; scale: 1; filter: blur(0); }
+.gb-check input:focus-visible ~ .gb-box { box-shadow: var(--gb-focus); }
+.gb-check:active .gb-box { scale: 0.96; }
+.gb-check .gb-check-text { display: flex; flex-direction: column; gap: 3px; }
+
+/* -------------------------------------------------------------------------
+   8. SLIDER - ticked track, filled portion, rounded-rect thumb with a grip.
+      The ticks are BARS cut into the track, not a dotted rule.
+   ------------------------------------------------------------------------- */
+/* Position comes from --gb-p (an unprefixed number, 0-100) set on .gb-slider.
+   The thumb travels inside the track instead of centering on the percent, so
+   0 and 100 sit flush with the track ends instead of hanging half off. */
+.gb-slider {
+  position: relative;
+  flex: 1;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  --gb-thumb-w: 14px;
+  --gb-p: 0;
+}
+.gb-slider .gb-slider-track {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  border-radius: var(--gb-r-1);
+  background:
+    repeating-linear-gradient(90deg,
+      transparent 0, transparent 13px,
+      rgba(255,255,255,0.075) 13px, rgba(255,255,255,0.075) 14px),
+    var(--gb-well);
+  box-shadow: var(--gb-well-shadow);
+}
+/* The fill stops under the middle of the thumb at every value. */
+.gb-slider .gb-slider-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--gb-thumb-w) / 2 + var(--gb-p) / 100 * (100% - var(--gb-thumb-w)));
+  border-radius: var(--gb-r-1) 0 0 var(--gb-r-1);
+  background: linear-gradient(90deg, rgba(139,92,255,0.22), var(--gb-accent));
+  box-shadow: 0 0 12px -2px rgba(139,92,255,0.55);
+}
+.gb-slider .gb-slider-thumb {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--gb-p) / 100 * (100% - var(--gb-thumb-w)));
+  width: var(--gb-thumb-w); height: 24px;
+  margin: -12px 0 0 0;
+  border-radius: var(--gb-r-knob);
+  cursor: ew-resize;
+  background: linear-gradient(180deg, #f6f7fa 0%, #cfd2d9 52%, #aeb1b9 100%);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.6), 0 3px 8px -3px rgba(0,0,0,0.5),
+              inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -1px 0 rgba(0,0,0,0.18);
+  transition-property: scale, box-shadow;
+  transition-duration: var(--gb-dur-press);
+  transition-timing-function: var(--gb-ease);
+}
+/* grip: a single machined line across the thumb */
+.gb-slider .gb-slider-thumb::before {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  translate: -50% -50%;
+  width: 6px; height: 1px;
+  background: rgba(0,0,0,0.30);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.55);
+}
+.gb-slider .gb-slider-thumb::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: var(--gb-hit); height: var(--gb-hit);
+}
+.gb-slider .gb-slider-thumb:hover {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.6), 0 4px 10px -3px rgba(0,0,0,0.55),
+              inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.18),
+              0 0 14px -2px rgba(139,92,255,0.55);
+}
+.gb-slider .gb-slider-thumb:active { scale: 0.96; }
+.gb-slider .gb-slider-thumb:focus-visible { outline: none; box-shadow: var(--gb-focus); }
+.gb-slider-ends { display: flex; justify-content: space-between; margin-top: 5px; }
+
+/* -------------------------------------------------------------------------
+   9. LEVEL METER - segmented bars in a recessed housing.
+      Segments are bars. There is no dot anywhere in this component.
+      Concentric: housing padding 5, housing radius 8, segment radius 3.
+   ------------------------------------------------------------------------- */
+.gb-meter-wrap { position: relative; }
+.gb-meter {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  padding: 5px;
+  border-radius: var(--gb-r-3);
+  background: var(--gb-well-deep);
+  box-shadow: var(--gb-well-shadow);
+}
+.gb-meter-seg {
+  flex: 1;
+  height: 26px;
+  border-radius: 3px;
+  background: var(--gb-signal-off);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+/* The lit layer sits exactly on top of the unlit bed, same padding and gap,
+   and is clipped to the current level. One clip, 24 segments, perfect
+   alignment, and only one thing ever animates. */
+.gb-meter-lit {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  gap: 2px;
+  padding: 5px;
+  pointer-events: none;
+  clip-path: inset(0 var(--gb-level-gap, 40%) 0 0);
+  transition-property: clip-path;
+  transition-duration: var(--gb-dur-fast);
+  transition-timing-function: var(--gb-ease);
+}
+.gb-meter-lit .gb-meter-seg { background: var(--gb-signal-rest); box-shadow: var(--gb-glow-accent); }
+.gb-meter-lit .gb-meter-seg.gb-live { background: var(--gb-signal-live); box-shadow: var(--gb-glow-live); }
+.gb-meter-lit .gb-meter-seg.gb-peak { background: var(--gb-signal-peak); box-shadow: var(--gb-glow-peak); }
+
+/* Marker: a vertical accent bar with a rounded-rect grip below the housing.
+   Position comes from --gb-mark (a number, 0-100) and is inset by the housing
+   padding, so the percent lands on the segment bed and not on the housing.
+   The stem carries a 1px black casing because it crosses lit segments in the
+   same hue: without it the one control in the module disappears into the
+   readout behind it. */
+.gb-meter-marker {
+  position: absolute;
+  top: -3px; bottom: -13px;
+  left: calc(5px + var(--gb-mark, 0) / 100 * (100% - 10px));
+  width: 3px;
+  translate: -1.5px 0;
+  background: var(--gb-accent-hi);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.78), var(--gb-glow-accent);
+  border-radius: 1.5px;
+  cursor: ew-resize;
+  z-index: 2;
+  transition-property: box-shadow;
+  transition-duration: var(--gb-dur-fast);
+  transition-timing-function: var(--gb-ease);
+}
+/* 40 x 40 hit area centered on the grip. Nothing interactive sits within it:
+   the meter it overlaps is a readout, so the two never collide. */
+.gb-meter-marker::before {
+  content: "";
+  position: absolute;
+  left: 50%; bottom: 3px;
+  translate: -50% 50%;
+  width: var(--gb-hit); height: var(--gb-hit);
+}
+.gb-meter-marker::after {
+  content: "";
+  position: absolute;
+  bottom: -5px; left: 50%;
+  translate: -50% 0;
+  width: 20px; height: 14px;
+  border-radius: var(--gb-r-1);
+  background: linear-gradient(180deg, var(--gb-accent-hi), var(--gb-accent-fill));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 2px 5px rgba(0,0,0,0.6), var(--gb-glow-accent);
+  transition-property: scale, box-shadow;
+  transition-duration: var(--gb-dur-press);
+  transition-timing-function: var(--gb-ease);
+}
+.gb-meter-marker:hover::after {
+  background: linear-gradient(180deg, #c0a9ff, var(--gb-accent));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 2px 6px rgba(0,0,0,0.6),
+              0 0 16px rgba(139,92,255,0.8), 0 0 34px rgba(139,92,255,0.3);
+}
+.gb-meter-marker:active::after { scale: 0.96; }
+.gb-meter-marker:focus-visible { outline: none; box-shadow: var(--gb-focus); }
+.gb-meter-scale { display: flex; justify-content: space-between; margin-bottom: 7px; }
+
+/* -------------------------------------------------------------------------
+   10. READOUT CHIP - a phosphor well cut into the panel.
+       Printed caption above, glowing numeral below. Scanlines, no dots.
+   ------------------------------------------------------------------------- */
+.gb-readout {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 82px;
+  padding: 6px 12px 7px;
+  border-radius: var(--gb-r-3);
+  background: var(--gb-well-deep);
+  box-shadow: var(--gb-well-shadow);
+}
+.gb-readout::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg,
+    transparent 0, transparent 2.4px, rgba(0,10,6,0.22) 2.4px, rgba(0,10,6,0.22) 3px);
+}
+.gb-readout > * { position: relative; z-index: 3; }
+.gb-readout .gb-readout-label {
+  font-family: var(--gb-font-mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--gb-phosphor-dim);
+}
+.gb-readout .gb-readout-value {
+  font-family: var(--gb-font-mono);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
+  color: var(--gb-phosphor);
+  text-shadow: var(--gb-phosphor-glow);
+}
+.gb-readout .gb-readout-value small { font-size: 11px; letter-spacing: 0.02em; opacity: 0.78; margin-left: 4px; }
+.gb-readout.gb-lg { min-width: 110px; }
+.gb-readout.gb-lg .gb-readout-value { font-size: var(--gb-t-readout); }
+.gb-readout.gb-muted .gb-readout-value { color: var(--gb-phosphor-dim); text-shadow: none; }
+
+/* -------------------------------------------------------------------------
+   11. PALETTE CHIP - a gradient capsule with its name printed under it.
+       Concentric: chip padding 4, chip radius 8, gradient bar radius 4.
+   ------------------------------------------------------------------------- */
+.gb-palette { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--gb-s-2); }
+.gb-swatch {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: var(--gb-s-1);
+  border-radius: var(--gb-r-3);
+  background: var(--gb-surface);
+  box-shadow: var(--gb-shadow-1);
+  transition-property: background-color, box-shadow, scale;
+  transition-duration: var(--gb-dur-fast);
+  transition-timing-function: var(--gb-ease);
+}
+/* The gradient bar is image content: it carries the same 1px low-opacity
+   inset outline every image in the system gets, so a near-white palette has
+   a defined edge instead of bleeding into the chip. */
+.gb-swatch .gb-swatch-bar {
+  height: 16px;
+  border-radius: var(--gb-r-1);
+  outline: 1px solid rgba(255, 255, 255, 0.10);
+  outline-offset: -1px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.45), inset 0 -1px 0 rgba(255,255,255,0.22);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .gb-swatch .gb-swatch-bar { outline-color: rgba(0, 0, 0, 0.14); }
+}
+:root[data-theme="light"] .gb-swatch .gb-swatch-bar { outline-color: rgba(0, 0, 0, 0.14); }
+.gb-swatch .gb-swatch-name {
+  font-family: var(--gb-font-sans);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--gb-fg-3);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition-property: color;
+  transition-duration: var(--gb-dur-fast);
+  transition-timing-function: var(--gb-ease);
+}
+.gb-swatch:hover { background: var(--gb-surface-hi); box-shadow: var(--gb-shadow-2); }
+.gb-swatch:active { scale: 0.96; }
+.gb-swatch:focus-visible { outline: none; box-shadow: var(--gb-focus); }
+.gb-swatch.gb-on {
+  background: var(--gb-surface-hi);
+  box-shadow: 0 0 0 1px var(--gb-accent-line), 0 0 22px -6px rgba(139,92,255,0.75),
+              0 2px 6px -2px rgba(0,0,0,0.5);
+}
+.gb-swatch.gb-on .gb-swatch-name { color: var(--gb-fg-1); }
+/* selection underline: a bar, never a dot */
+.gb-swatch.gb-on::after {
+  content: "";
+  position: absolute;
+  left: 50%; bottom: -1px;
+  translate: -50% 0;
+  width: 22px; height: 2px;
+  border-radius: 1px;
+  background: var(--gb-accent);
+  box-shadow: var(--gb-glow-accent);
+}
+
+/* -------------------------------------------------------------------------
+   12. DISCLOSURE GROUP - native SwiftUI DisclosureGroup, with a chevron
+       that rotates. The summary row is a full-width hit target.
+   ------------------------------------------------------------------------- */
+.gb-disclosure > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: var(--gb-hit);
+  /* bled 8px past the content edge so the hover tint reads as a row while the
+     accent bar stays aligned with every other section title */
+  padding: 0 var(--gb-s-3);
+  margin: 0 calc(-1 * var(--gb-s-3));
+  border-radius: var(--gb-r-2);
+  transition-property: background-color, scale;
+  transition-duration: var(--gb-dur-fast);
+  transition-timing-function: var(--gb-ease);
+}
+.gb-disclosure > summary::-webkit-details-marker { display: none; }
+.gb-disclosure > summary:hover { background: var(--gb-accent-wash); }
+.gb-disclosure > summary:focus-visible { outline: none; box-shadow: var(--gb-focus); }
+.gb-disclosure > summary:active { scale: 0.99; }
+.gb-disclosure .gb-chevron {
+  width: 9px; height: 9px;
+  flex-shrink: 0;
+  border-right: 1.6px solid var(--gb-fg-3);
+  border-bottom: 1.6px solid var(--gb-fg-3);
+  rotate: -45deg;
+  translate: 0 -1px;
+  transition-property: rotate, border-color;
+  transition-duration: var(--gb-dur-base);
+  transition-timing-function: var(--gb-ease);
+}
+.gb-disclosure[open] .gb-chevron { rotate: 45deg; translate: 0 -3px; }
+.gb-disclosure > summary:hover .gb-chevron { border-color: var(--gb-fg-1); }
+.gb-disclosure .gb-disclosure-body { padding-top: var(--gb-s-5); }
+
+/* -------------------------------------------------------------------------
+   13. STATUS BADGE - a filled rounded rectangle with a lit left edge.
+       This is what replaces every round "on air" pip.
+   ------------------------------------------------------------------------- */
+.gb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 9px 4px 7px;
+  border-radius: var(--gb-r-2);
+  background: var(--gb-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--gb-accent-line);
+  font-family: var(--gb-font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gb-accent);
+}
+.gb-badge::before {
+  content: "";
+  width: 3px; height: 11px;
+  border-radius: 1.5px;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+  animation: gb-breathe 1.6s var(--gb-ease) infinite alternate;
+}
+.gb-badge.gb-static::before { animation: none; }
+/* Quiet variant: a state that is real but not live. */
+.gb-badge.gb-quiet {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--gb-hairline-strong);
+  color: var(--gb-fg-3);
+}
+.gb-badge.gb-quiet::before { box-shadow: none; animation: none; }
+@keyframes gb-breathe { from { opacity: 0.42; } to { opacity: 1; } }
+
+/* Brandmark: a stacked bar glyph, the Glowbeat signature. No dot. */
+.gb-brand { display: inline-flex; align-items: center; gap: 8px; }
+.gb-brand-mark { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+.gb-brand-mark i {
+  display: block;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--gb-accent);
+  box-shadow: var(--gb-glow-accent);
+}
+.gb-brand-mark i:nth-child(1) { height: 6px; }
+.gb-brand-mark i:nth-child(2) { height: 12px; }
+.gb-brand-mark i:nth-child(3) { height: 8px; }
+.gb-brand-name {
+  font-family: var(--gb-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gb-fg-2);
+}
+
+/* -------------------------------------------------------------------------
+   14. STATES
+   ------------------------------------------------------------------------- */
+.gb-inert { opacity: 0.4; pointer-events: none; filter: saturate(0.25); }
+
+@media (prefers-reduced-motion: reduce) {
+  .gb *, .gb *::before, .gb *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+html,body{margin:0;padding:0;background:var(--gb-void)}
+body{min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:26px 20px 52px;font-family:var(--gb-font-sans);color:var(--gb-fg-1);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  background:
+    radial-gradient(ellipse 66% 40% at 50% 0%, rgba(139,92,255,.10) 0%, transparent 68%),
+    var(--gb-void)}
+
+.srcline{width:548px;max-width:100%;margin:0 0 18px;text-align:center;
+  font-size:11px;line-height:1.55;color:var(--gb-fg-3);text-wrap:pretty}
+.srcline b{color:var(--gb-fg-2);font-weight:600}
+
+.win{width:548px;max-width:100%}
+
+/* the hero module gets room to breathe and is the only thing that moves */
+.hero{margin:6px 0 2px}
+.hero-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:16px}
+.hero .gb-meter-seg{height:32px}
+.hero .gb-meter-lit{animation:gb-level 1.6s cubic-bezier(.3,.9,.4,1) infinite alternate;
+  /* the only element on the page under a continuous animation, and clip-path
+     is GPU-compositable: the one place will-change earns its layer */
+  will-change:clip-path}
+@keyframes gb-level{
+  0%{clip-path:inset(0 24% 0 0)}18%{clip-path:inset(0 41% 0 0)}38%{clip-path:inset(0 21% 0 0)}
+  56%{clip-path:inset(0 37% 0 0)}76%{clip-path:inset(0 18% 0 0)}100%{clip-path:inset(0 33% 0 0)}}
+
+.hdr{display:flex;align-items:center;gap:14px;padding-bottom:6px}
+.hdr .sp{flex:1}
+.sub{margin:11px 0 0}
+.adv-grp{display:flex;flex-direction:column;gap:18px}
+.gb-shell-foot .gb-micro{letter-spacing:.12em}
+
+@media (prefers-reduced-motion:reduce){.hero .gb-meter-lit{animation:none}}
+@media (max-width:620px){
+  .gb-shell-body{padding:18px 16px 14px}
+  .gb-row>.gb-printed{width:62px}
+}
+@media (max-width:430px){
+  .gb-palette{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .gb-row{flex-wrap:wrap}
+}
+
+</style></head>
+<body class="gb">
+
+<p class="srcline"><b>Glowbeat Design System.</b> MiniDisc UI hardware chassis, PW-SEQ-1 single-accent control surface, Apple Liquid Glass materials, native SwiftUI macOS controls. No dots anywhere.</p>
+
+<div class="win">
+<div class="gb-shell">
+
+  <div class="gb-shell-head">
+    <span class="gb-brand">
+      <span class="gb-brand-mark"><i></i><i></i><i></i></span>
+      <span class="gb-brand-name">Glowbeat</span>
+    </span>
+  </div>
+  <div class="gb-chrome-strip"></div>
+
+  <div class="gb-shell-body">
+
+    <!-- HEADER -->
+    <div class="hdr">
+      <h1 class="gb-title">Party Mode</h1>
+      <span class="sp"></span>
+      <span class="gb-badge">On</span>
+      <label class="gb-switch">
+        <input type="checkbox" checked aria-label="Party Mode">
+        <span class="gb-track"><span class="gb-knob"></span></span>
+      </label>
+    </div>
+
+    <!-- TRIGGER LEVEL - the hero -->
+    <section class="gb-section hero" style="border-top:0">
+      <div class="gb-glass gb-primed">
+        <div class="hero-head">
+          <span class="gb-section-title"><span>Trigger Level</span></span>
+          <div class="gb-readout gb-lg">
+            <span class="gb-readout-label">Thresh</span>
+            <span class="gb-readout-value">69<small>%</small></span>
+          </div>
+        </div>
+
+        <div class="gb-meter-scale">
+          <span class="gb-micro">Quiet</span>
+          <span class="gb-micro">-12 dB</span>
+          <span class="gb-micro">Loud</span>
+        </div>
+        <div class="gb-meter-wrap">
+          <div class="gb-meter" role="meter" aria-label="Input level"
+               aria-valuemin="0" aria-valuemax="100" aria-valuenow="76">
+            <span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span>
+            <div class="gb-meter-lit" style="--gb-level-gap:24%"><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg"></span><span class="gb-meter-seg gb-live"></span><span class="gb-meter-seg gb-live"></span><span class="gb-meter-seg gb-live"></span><span class="gb-meter-seg gb-live"></span><span class="gb-meter-seg gb-live"></span><span class="gb-meter-seg gb-live"></span><span class="gb-meter-seg gb-peak"></span><span class="gb-meter-seg gb-peak"></span></div>
+          </div>
+          <div class="gb-meter-marker" style="--gb-mark:69" role="slider" tabindex="0"
+               aria-label="Trigger level" aria-valuemin="0" aria-valuemax="100"
+               aria-valuenow="69" aria-valuetext="69 percent"></div>
+        </div>
+
+        <p class="gb-caption" style="margin:24px 0 0">Lights kick in when the music is louder than the marker. Lower catches more, higher only the loud parts.</p>
+
+        <label class="gb-check" style="margin-top:16px">
+          <input type="checkbox" aria-describedby="always-help">
+          <span class="gb-box"></span>
+          <span class="gb-check-text">
+            <span class="gb-body">Always react</span>
+            <span class="gb-caption" id="always-help">React to every sound, no matter how quiet.</span>
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <!-- EFFECT -->
+    <section class="gb-section">
+      <div class="gb-section-head">
+        <span class="gb-section-title"><span>Effect</span></span>
+        <span class="gb-micro">Wave</span>
+      </div>
+      <div class="gb-steps" role="radiogroup" aria-label="Effect">
+        <button class="gb-step" type="button" role="radio" aria-checked="false">Pulse</button>
+        <button class="gb-step" type="button" role="radio" aria-checked="false">Spread</button>
+        <button class="gb-step gb-on" type="button" role="radio" aria-checked="true">Wave</button>
+        <button class="gb-step" type="button" role="radio" aria-checked="false">Glow</button>
+      </div>
+      <p class="gb-caption sub">Color travels from bulb to bulb.</p>
+    </section>
+
+    <!-- TRAVEL -->
+    <section class="gb-section">
+      <div class="gb-row">
+        <span class="gb-printed">Travel</span>
+        <div class="gb-slider" style="--gb-p:64.3">
+          <div class="gb-slider-track">
+            <div class="gb-slider-fill"></div>
+            <div class="gb-slider-thumb" role="slider" tabindex="0"
+                 aria-label="Travel" aria-valuemin="1" aria-valuemax="15"
+                 aria-valuenow="10" aria-valuetext="10 bulbs per second"></div>
+          </div>
+        </div>
+        <div class="gb-readout" style="min-width:96px">
+          <span class="gb-readout-label">Travel</span>
+          <span class="gb-readout-value">10<small>bulbs/s</small></span>
+        </div>
+      </div>
+      <p class="gb-caption sub">How fast the color moves from bulb to bulb. Higher is faster.</p>
+    </section>
+
+    <!-- PALETTE -->
+    <section class="gb-section">
+      <div class="gb-section-head">
+        <span class="gb-section-title"><span>Palette</span></span>
+        <span class="gb-micro">Blacklight</span>
+      </div>
+      <div class="gb-palette" role="radiogroup" aria-label="Palette"><button class="gb-swatch" type="button" role="radio" aria-checked="false"><span class="gb-swatch-bar" style="background:linear-gradient(90deg,#ff2d55,#ffcc00 38%,#34c759 68%,#0a84ff)"></span><span class="gb-swatch-name">Party</span></button><button class="gb-swatch" type="button" role="radio" aria-checked="false"><span class="gb-swatch-bar" style="background:linear-gradient(90deg,#ff3b1f,#ff8a00 55%,#ffd27f)"></span><span class="gb-swatch-name">Sunset</span></button><button class="gb-swatch" type="button" role="radio" aria-checked="false"><span class="gb-swatch-bar" style="background:linear-gradient(90deg,#0540a8,#00a3c4 55%,#5ce1e6)"></span><span class="gb-swatch-name">Ocean</span></button><button class="gb-swatch" type="button" role="radio" aria-checked="false"><span class="gb-swatch-bar" style="background:linear-gradient(90deg,#ff00d4,#00fff0 52%,#8cff00)"></span><span class="gb-swatch-name">Neon</span></button><button class="gb-swatch" type="button" role="radio" aria-checked="false"><span class="gb-swatch-bar" style="background:linear-gradient(90deg,#ffcf94,#fff3e2 52%,#ffe0b0)"></span><span class="gb-swatch-name">Warm White</span></button><button class="gb-swatch gb-on" type="button" role="radio" aria-checked="true"><span class="gb-swatch-bar" style="background:linear-gradient(90deg,#2400a8,#6a1bff 34%,#b14bff 62%,#3a18ff)"></span><span class="gb-swatch-name">Blacklight</span></button><button class="gb-swatch" type="button" role="radio" aria-checked="false"><span class="gb-swatch-bar" style="background:linear-gradient(90deg,#08461a,#2fa84f 55%,#9ad64f)"></span><span class="gb-swatch-name">Forest</span></button><button class="gb-swatch" type="button" role="radio" aria-checked="false"><span class="gb-swatch-bar" style="background:linear-gradient(90deg,#ff5fb8,#ffa8e2 50%,#b48dff)"></span><span class="gb-swatch-name">Candy</span></button><button class="gb-swatch" type="button" role="radio" aria-checked="false"><span class="gb-swatch-bar" style="background:linear-gradient(90deg,#8fd6ff,#d8f2ff 50%,#6fc6ff)"></span><span class="gb-swatch-name">Ice</span></button><button class="gb-swatch" type="button" role="radio" aria-checked="false"><span class="gb-swatch-bar" style="background:linear-gradient(90deg,#6b0a00,#ff3b00 52%,#ffb300)"></span><span class="gb-swatch-name">Fire</span></button></div>
+    </section>
+
+    <!-- ADVANCED -->
+    <section class="gb-section">
+      <details class="gb-disclosure" open>
+        <summary>
+          <span class="gb-section-title"><span>Advanced</span></span>
+          <span class="gb-rule"></span>
+          <span class="gb-chevron"></span>
+        </summary>
+        <div class="gb-disclosure-body adv-grp">
+
+          <div>
+            <div class="gb-row">
+              <span class="gb-printed">Darkest</span>
+              <div class="gb-slider" style="--gb-p:24">
+          <div class="gb-slider-track">
+            <div class="gb-slider-fill"></div>
+            <div class="gb-slider-thumb" role="slider" tabindex="0"
+                       aria-label="Darkest" aria-valuemin="0" aria-valuemax="100"
+                       aria-valuenow="24" aria-valuetext="24 percent"></div>
+                </div>
+              </div>
+              <div class="gb-readout"><span class="gb-readout-label">Min</span><span class="gb-readout-value">24<small>%</small></span></div>
+            </div>
+            <div class="gb-row" style="margin-top:10px">
+              <span class="gb-printed">Brightest</span>
+              <div class="gb-slider" style="--gb-p:100">
+          <div class="gb-slider-track">
+            <div class="gb-slider-fill"></div>
+            <div class="gb-slider-thumb" role="slider" tabindex="0"
+                       aria-label="Brightest" aria-valuemin="0" aria-valuemax="100"
+                       aria-valuenow="100" aria-valuetext="100 percent"></div>
+                </div>
+              </div>
+              <div class="gb-readout"><span class="gb-readout-label">Max</span><span class="gb-readout-value">100<small>%</small></span></div>
+            </div>
+            <p class="gb-caption sub">The bulbs move between these two brightnesses: Darkest between beats, Brightest on a hit.</p>
+          </div>
+
+          <div>
+            <div class="gb-row">
+              <span class="gb-printed">Snap</span>
+              <div class="gb-slider" style="--gb-p:62">
+          <div class="gb-slider-track">
+            <div class="gb-slider-fill"></div>
+            <div class="gb-slider-thumb" role="slider" tabindex="0"
+                       aria-label="Snap" aria-valuemin="0" aria-valuemax="100"
+                       aria-valuenow="62" aria-valuetext="0.05 seconds"></div>
+                </div>
+              </div>
+              <div class="gb-readout"><span class="gb-readout-label">Attack</span><span class="gb-readout-value">0.05<small>s</small></span></div>
+            </div>
+            <p class="gb-caption sub">Higher is faster. At 100% the lights jump the instant a hit lands; lower eases them in.</p>
+          </div>
+
+          <div>
+            <div class="gb-row">
+              <span class="gb-printed">Fade</span>
+              <div class="gb-slider" style="--gb-p:24">
+          <div class="gb-slider-track">
+            <div class="gb-slider-fill"></div>
+            <div class="gb-slider-thumb" role="slider" tabindex="0"
+                       aria-label="Fade" aria-valuemin="0" aria-valuemax="100"
+                       aria-valuenow="24" aria-valuetext="0.5 seconds"></div>
+                </div>
+              </div>
+              <div class="gb-readout"><span class="gb-readout-label">Release</span><span class="gb-readout-value">0.5<small>s</small></span></div>
+            </div>
+            <p class="gb-caption sub">How long the lights take to settle after a hit. Higher is a longer, slower fade.</p>
+          </div>
+
+        </div>
+      </details>
+    </section>
+
+  </div>
+
+  <div class="gb-chrome-strip"></div>
+  <div class="gb-shell-foot">
+    <span class="gb-micro">6 bulbs. Party Mode is on.</span>
+  </div>
+
+</div>
+</div>
+
+</body></html>

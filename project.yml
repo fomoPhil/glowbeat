@@ -1,0 +1,101 @@
+name: Glowbeat
+options:
+  bundleIdPrefix: com.philwoolley
+  deploymentTarget:
+    macOS: "14.4"
+  createIntermediateGroups: true
+  minimumXcodeGenVersion: "2.44.0"
+  groupSortPosition: top
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+    GCC_TREAT_WARNINGS_AS_ERRORS: YES
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: AXW4GKUTKZ
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_HARDENED_RUNTIME: YES
+    DEAD_CODE_STRIPPING: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+packages:
+  GoveeLAN:
+    path: Packages/GoveeLAN
+  AudioTap:
+    path: Packages/AudioTap
+  Effects:
+    path: Packages/Effects
+  # Auto-update for the direct download build. The feed and the EdDSA public key live in
+  # App/Info.plist (SUFeedURL, SUPublicEDKey); releasing is in docs/releasing.md.
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.10.0
+targets:
+  Glowbeat:
+    type: application
+    platform: macOS
+    sources:
+      - path: App
+        excludes:
+          - Info.plist
+          - Glowbeat.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.philwoolley.glowbeat
+        PRODUCT_NAME: Glowbeat
+        GENERATE_INFOPLIST_FILE: NO
+        # The shipping plist sets LSMultipleInstancesProhibited, so macOS refuses to
+        # launch the unit test host while a copy of Glowbeat is already open, and the
+        # whole app suite fails with "Could not launch GlowbeatTests". Overriding this
+        # one variable on the xcodebuild command line runs the suite against a copy of
+        # the plist without that key:
+        #
+        #   cp App/Info.plist build/Info-testhost.plist
+        #   /usr/libexec/PlistBuddy -c "Delete :LSMultipleInstancesProhibited" \
+        #       build/Info-testhost.plist
+        #   xcodebuild ... test GLOWBEAT_INFOPLIST_FILE=build/Info-testhost.plist
+        #
+        # It defaults to the shipping plist, so normal builds, archives and releases
+        # are unaffected.
+        GLOWBEAT_INFOPLIST_FILE: App/Info.plist
+        INFOPLIST_FILE: $(GLOWBEAT_INFOPLIST_FILE)
+        CODE_SIGN_ENTITLEMENTS: App/Glowbeat.entitlements
+        COMBINE_HIDPI_IMAGES: YES
+        ENABLE_PREVIEWS: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    dependencies:
+      - package: GoveeLAN
+        product: GoveeLAN
+      - package: AudioTap
+        product: AudioTap
+      - package: Effects
+        product: Effects
+      - package: Sparkle
+        product: Sparkle
+  GlowbeatTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: AppTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.philwoolley.glowbeat.tests
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - target: Glowbeat
+      - package: GoveeLAN
+        product: GoveeLANTestSupport
+schemes:
+  Glowbeat:
+    build:
+      targets:
+        Glowbeat: all
+        GlowbeatTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: false
+      targets:
+        - GlowbeatTests

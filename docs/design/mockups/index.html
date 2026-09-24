@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glowbeat Party Mode - Five Design Systems</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#050506;color:#d8d9de;
+  font-family:system-ui,-apple-system,'Helvetica Neue',sans-serif;font-size:13px;line-height:1.5;
+  -webkit-font-smoothing:antialiased}
+body{padding:30px 22px 60px}
+
+header{max-width:2100px;margin:0 auto 24px;display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap}
+h1{font-size:18px;font-weight:700;letter-spacing:.01em;color:#f0f1f4}
+header p{font-size:12.5px;color:#7c7d85;max-width:56ch}
+header .sp{flex:1}
+
+.switcher{display:flex;gap:4px;padding:4px;background:#101013;border-radius:7px;border:1px solid #1e1e23}
+.switcher button{appearance:none;border:0;background:transparent;color:#83848c;cursor:pointer;
+  font:inherit;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  padding:7px 13px;border-radius:5px}
+.switcher button:hover{color:#c8c9d0}
+.switcher button[aria-pressed="true"]{background:#26262d;color:#f0f1f4;box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+.switcher button:focus-visible{outline:2px solid #6aa9ff;outline-offset:2px}
+
+.grid{max-width:2100px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px;align-items:start}
+.grid.stacked{grid-template-columns:minmax(0,1fr);max-width:640px}
+.grid.stacked .col:not(.shown){display:none}
+
+.col{background:#0b0b0e;border:1px solid #1c1c21;border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.col h2{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#e2e3e8;padding:14px 16px 0}
+.col .sub{font-size:12px;color:#83848c;padding:6px 16px 13px;line-height:1.55;border-bottom:1px solid #1c1c21}
+.col .sub b{color:#b6b7be;font-weight:600}
+.col iframe{width:100%;height:1180px;border:0;display:block;background:#050506}
+.col .open{display:block;padding:10px 16px;border-top:1px solid #1c1c21;font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:#7c7d85;text-decoration:none}
+.col .open:hover{color:#dcdde2;background:#131318}
+
+footer{max-width:2100px;margin:26px auto 0;font-size:11.5px;color:#5e5f66;line-height:1.7}
+
+@media (max-width:1900px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:1620px}}
+@media (max-width:1560px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));max-width:1200px}}
+@media (max-width:1180px){.grid{grid-template-columns:minmax(0,1fr);max-width:640px}}
+</style></head>
+<body>
+
+<header>
+  <div>
+    <h1>Glowbeat Party Mode, five ways</h1>
+    <p>The same macOS panel, same controls, same copy. Only the design system changes.</p>
+  </div>
+  <div class="sp"></div>
+  <div class="switcher" role="group" aria-label="Layout">
+    <button id="bSide" aria-pressed="true">Side by side</button>
+    <button id="bOne" aria-pressed="false">One at a time</button>
+  </div>
+</header>
+
+<div class="grid" id="grid">
+  <section class="col shown" data-i="0">
+    <h2>01 &middot; MiniDisc UI</h2>
+    <p class="sub"><b>MiniDisc UI Design System.</b> Sony-hardware chassis: brushed metal, chrome strip, green phosphor LCD wells, pad-printed silver labels, segmented VU meter.</p>
+    <iframe src="01-minidisc.html" title="Party Mode in the MiniDisc UI design system" loading="lazy"></iframe>
+    <a class="open" href="01-minidisc.html" target="_blank" rel="noopener">Open full size</a>
+  </section>
+
+  <section class="col" data-i="1">
+    <h2>02 &middot; PW-SEQ-1</h2>
+    <p class="sub"><b>PW-SEQ-1 Design System.</b> Molded sequencer cabinet: orange accent, step buttons with LEDs, ticked slider tracks, boxed VT323 readouts, Space Mono chrome with sentence-case help text.</p>
+    <iframe src="02-pwseq1.html" title="Party Mode in the PW-SEQ-1 design system" loading="lazy"></iframe>
+    <a class="open" href="02-pwseq1.html" target="_blank" rel="noopener">Open full size</a>
+  </section>
+
+  <section class="col" data-i="2">
+    <h2>03 &middot; Hybrid</h2>
+    <p class="sub"><b>Hybrid.</b> MiniDisc shell, printed labels, metal hardware and segmented VU meter. PW-SEQ-1 orange accent, step-button picker, ticked tracks, phosphor readout chips, Space Mono chrome and sentence-case help text. Shown with "Always react" checked, so the threshold is grayed out.</p>
+    <iframe src="03-hybrid.html" title="Party Mode in the hybrid design system" loading="lazy"></iframe>
+    <a class="open" href="03-hybrid.html" target="_blank" rel="noopener">Open full size</a>
+  </section>
+
+  <section class="col" data-i="3">
+    <h2>04 &middot; Glowbeat</h2>
+    <p class="sub"><b>Glowbeat Design System.</b> MiniDisc chassis, chrome strips and segmented meter. PW-SEQ-1 single-accent discipline, step buttons and ticked tracks. Liquid Glass sheets, native SwiftUI controls, SF Pro. Every dot removed: indicators are bars, underlines and edge glows.</p>
+    <iframe src="04-glowbeat.html" title="Party Mode in the Glowbeat design system" loading="lazy"></iframe>
+    <a class="open" href="04-glowbeat.html" target="_blank" rel="noopener">Open full size</a>
+  </section>
+
+  <section class="col" data-i="4">
+    <h2>05 &middot; Minimal 2026</h2>
+    <p class="sub"><b>Minimal 2026.</b> The opposite of the hardware mockups: SF Pro only, a quiet neutral panel, one lamp-amber accent, one Liquid Glass sheet carrying Trigger Level, concentric radii and layered shadows in place of borders. Dark and light are both first class.</p>
+    <iframe src="05-minimal.html" title="Party Mode in the Minimal 2026 design system" loading="lazy"></iframe>
+    <a class="open" href="05-minimal.html" target="_blank" rel="noopener">Open full size</a>
+  </section>
+</div>
+
+<footer>
+  Every file is self-contained: fonts embedded as data URIs, no external stylesheets or scripts.
+  Mockups 01, 02, 04 and 05 show "Always react" unchecked; mockup 03 shows it checked so both states are visible across the set.
+</footer>
+
+<script>
+(function(){
+  var grid=document.getElementById('grid'),cols=grid.querySelectorAll('.col');
+  var bSide=document.getElementById('bSide'),bOne=document.getElementById('bOne');
+  var stacked=false,active=0;
+  function render(){
+    grid.classList.toggle('stacked',stacked);
+    bSide.setAttribute('aria-pressed',String(!stacked));
+    bOne.setAttribute('aria-pressed',String(stacked));
+    cols.forEach(function(c,i){c.classList.toggle('shown',!stacked||i===active);});
+  }
+  bSide.addEventListener('click',function(){stacked=false;render();});
+  bOne.addEventListener('click',function(){
+    if(stacked){active=(active+1)%cols.length;} else {stacked=true;active=0;}
+    render();
+  });
+  render();
+})();
+</script>
+</body></html>

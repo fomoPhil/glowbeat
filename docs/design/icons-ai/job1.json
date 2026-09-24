@@ -1,0 +1,23 @@
+[
+  {
+    "created_at": "2026-09-14T17:14:34.218803Z",
+    "display_name": "GPT Image 2.5",
+    "id": "94dd2c91-2300-4f26-8cf6-fcb1aef4f39b",
+    "job_type": "gpt_image_2_5",
+    "min_result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_2xvHZj9JrVZKVQx6NFyGSK0Kzcl/hf_20260914_171434_94dd2c91-2300-4f26-8cf6-fcb1aef4f39b_min.webp",
+    "params": {
+      "aspect_ratio": "1:1",
+      "height": 1024,
+      "medias": [],
+      "model": "flare",
+      "prompt": "macOS app icon for an app called Glowbeat, a Mac app that makes smart light bulbs pulse to music. Apple macOS Sonoma icon style: a single rounded-square (squircle) tile with soft top-lit glassy gradient, subtle inner shadow, centered on a plain solid dark gray background with nothing else, no text, no letters, no watermark, no border, front view, ultra clean vector-like rendering, high detail. The tile is a deep ultraviolet violet gradient. Inside: a stylized light bulb whose filament is a glowing rainbow audio waveform (red, orange, yellow, green, cyan, blue, magenta), bright bloom around the filament.",
+      "quality": "high",
+      "reference_elements": [],
+      "remove_bg": false,
+      "resolution": "1k",
+      "width": 1024
+    },
+    "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_2xvHZj9JrVZKVQx6NFyGSK0Kzcl/hf_20260914_171434_94dd2c91-2300-4f26-8cf6-fcb1aef4f39b.png",
+    "status": "completed"
+  }
+]

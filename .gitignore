@@ -1,0 +1,14 @@
+.DS_Store
+build/
+.build/
+DerivedData/
+Glowbeat.xcodeproj/
+*.xcuserstate
+xcuserdata/
+.superpowers/
+
+# Agent worktrees
+.claude/
+
+# Release output (dmg, appcast, archives)
+dist/

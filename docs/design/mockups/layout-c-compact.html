@@ -1,0 +1,858 @@
+<!doctype html>
+<html lang="en" data-theme="dark"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glowbeat Layout C - Compact stack</title>
+<style>
+/* ============================================================
+   GLOWBEAT - 05 MINIMAL 2026 tokens and components
+   Carried over from 05-minimal.html: one type family (system),
+   one accent (lamp amber), one glass sheet (Trigger Level),
+   hand rolled segmented pickers. Dark first, light equal.
+   ============================================================ */
+
+:root{
+  color-scheme: dark;
+
+  --void:      #0d0d0f;
+  --win:       #1a1a1e;
+  --win-hi:    #202026;
+  --trough:    rgba(255,255,255,.055);
+  --raise:     #33333b;
+  --raise-hov: #3b3b44;
+
+  --fg1: #f3f3f6;
+  --fg2: #a0a0a9;
+  --fg3: #7b7b84;
+
+  --accent:      #ffb43c;
+  --accent-soft: rgba(255,180,60,.22);
+  --accent-glow: rgba(255,180,60,.30);
+
+  --hair: rgba(255,255,255,.075);
+
+  --glass-fill: rgba(255,255,255,.055);
+  --glass-edge: inset 0 1px 0 rgba(255,255,255,.14),
+                inset 0 0 0 1px rgba(255,255,255,.055);
+  --glass-drop: 0 1px 1px rgba(0,0,0,.30),
+                0 8px 24px -10px rgba(0,0,0,.55),
+                0 24px 60px -30px rgba(0,0,0,.70);
+
+  --lift:     0 0 0 1px rgba(255,255,255,.09),
+              0 1px 2px rgba(0,0,0,.34);
+  --lift-hov: 0 0 0 1px rgba(255,255,255,.15),
+              0 2px 5px rgba(0,0,0,.38);
+
+  --card:      rgba(255,255,255,.028);
+  --card-edge: 0 0 0 1px rgba(255,255,255,.055);
+
+  --win-drop: 0 0 0 1px rgba(255,255,255,.06),
+              0 2px 6px rgba(0,0,0,.30),
+              0 24px 50px -18px rgba(0,0,0,.60),
+              0 60px 120px -50px rgba(0,0,0,.85);
+
+  --thumb: #c9c9d3;
+
+  --meter-off: rgba(255,255,255,.085);
+  --meter-on:  rgba(243,243,246,.38);
+  --meter-pk:  rgba(243,243,246,.18);
+
+  --ambient-a: rgba(140,110,255,.16);
+  --ambient-b: rgba(255,180,60,.10);
+
+  --tip-bg: #2c2c34;
+  --tip-fg: #f3f3f6;
+
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+          system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  --ease: cubic-bezier(.2,0,0,1);
+  --quick: 150ms;
+  --calm: 240ms;
+}
+
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    color-scheme: light;
+    --void:      #e4e4e8;
+    --win:       #f1f1f5;
+    --win-hi:    #f8f8fb;
+    --trough:    rgba(0,0,0,.055);
+    --raise:     #ffffff;
+    --raise-hov: #ffffff;
+
+    --fg1: #17171a;
+    --fg2: #5e5e67;
+    --fg3: #86868f;
+
+    --accent:      #a25e00;
+    --accent-soft: rgba(162,94,0,.18);
+    --accent-glow: rgba(162,94,0,.22);
+
+    --hair: rgba(0,0,0,.085);
+
+    --glass-fill: rgba(255,255,255,.80);
+    --glass-edge: inset 0 1px 0 rgba(255,255,255,.90),
+                  inset 0 0 0 1px rgba(0,0,0,.055);
+    --glass-drop: 0 1px 1px rgba(0,0,0,.05),
+                  0 8px 20px -8px rgba(0,0,0,.16),
+                  0 22px 44px -24px rgba(0,0,0,.24);
+
+    --lift:     0 0 0 1px rgba(0,0,0,.06),
+                0 1px 2px -1px rgba(0,0,0,.10),
+                0 2px 4px rgba(0,0,0,.05);
+    --lift-hov: 0 0 0 1px rgba(0,0,0,.09),
+                0 1px 2px -1px rgba(0,0,0,.13),
+                0 3px 7px rgba(0,0,0,.08);
+
+    --card:      rgba(255,255,255,.72);
+    --card-edge: 0 0 0 1px rgba(0,0,0,.055);
+
+    --win-drop: 0 0 0 1px rgba(0,0,0,.07),
+                0 2px 5px rgba(0,0,0,.05),
+                0 20px 40px -16px rgba(0,0,0,.14),
+                0 50px 100px -46px rgba(0,0,0,.22);
+
+    --thumb: #ffffff;
+
+    --meter-off: rgba(0,0,0,.075);
+    --meter-on:  rgba(23,23,26,.34);
+    --meter-pk:  rgba(23,23,26,.17);
+
+    --ambient-a: rgba(120,90,230,.14);
+    --ambient-b: rgba(255,160,40,.16);
+
+    --tip-bg: #26262c;
+    --tip-fg: #f6f6f8;
+  }
+}
+:root[data-theme="light"]{
+  color-scheme: light;
+  --void:      #e4e4e8;
+  --win:       #f1f1f5;
+  --win-hi:    #f8f8fb;
+  --trough:    rgba(0,0,0,.055);
+  --raise:     #ffffff;
+  --raise-hov: #ffffff;
+
+  --fg1: #17171a;
+  --fg2: #5e5e67;
+  --fg3: #86868f;
+
+  --accent:      #a25e00;
+  --accent-soft: rgba(162,94,0,.18);
+  --accent-glow: rgba(162,94,0,.22);
+
+  --hair: rgba(0,0,0,.085);
+
+  --glass-fill: rgba(255,255,255,.80);
+  --glass-edge: inset 0 1px 0 rgba(255,255,255,.90),
+                inset 0 0 0 1px rgba(0,0,0,.055);
+  --glass-drop: 0 1px 1px rgba(0,0,0,.05),
+                0 8px 20px -8px rgba(0,0,0,.16),
+                0 22px 44px -24px rgba(0,0,0,.24);
+
+  --lift:     0 0 0 1px rgba(0,0,0,.06),
+              0 1px 2px -1px rgba(0,0,0,.10),
+              0 2px 4px rgba(0,0,0,.05);
+  --lift-hov: 0 0 0 1px rgba(0,0,0,.09),
+              0 1px 2px -1px rgba(0,0,0,.13),
+              0 3px 7px rgba(0,0,0,.08);
+
+  --card:      rgba(255,255,255,.72);
+  --card-edge: 0 0 0 1px rgba(0,0,0,.055);
+
+  --win-drop: 0 0 0 1px rgba(0,0,0,.07),
+              0 2px 5px rgba(0,0,0,.05),
+              0 20px 40px -16px rgba(0,0,0,.14),
+              0 50px 100px -46px rgba(0,0,0,.22);
+
+  --thumb: #ffffff;
+
+  --meter-off: rgba(0,0,0,.075);
+  --meter-on:  rgba(23,23,26,.34);
+  --meter-pk:  rgba(23,23,26,.17);
+
+  --ambient-a: rgba(120,90,230,.14);
+  --ambient-b: rgba(255,160,40,.16);
+
+  --tip-bg: #26262c;
+  --tip-fg: #f6f6f8;
+}
+
+/* ---------- reset ---------- */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none !important}
+html{
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  height:100%;
+  background:var(--void);
+}
+body{
+  height:100%;
+  background:var(--void);
+  color:var(--fg1);
+  font-family:var(--font);
+  font-size:13px;line-height:1.45;
+  letter-spacing:-.003em;
+}
+
+/* ============================================================
+   WINDOW SHELL - 1000 x 760 content area
+   ============================================================ */
+.app{
+  position:relative;isolation:isolate;
+  height:100%;display:flex;flex-direction:column;overflow:hidden;
+  background:linear-gradient(180deg,var(--win-hi) 0%,var(--win) 240px);
+}
+/* the only thing the glass sheet has to refract */
+.app::before{
+  content:"";position:absolute;z-index:-1;left:-8%;right:-8%;top:-220px;height:760px;
+  background:
+    radial-gradient(42% 46% at 26% 60%, var(--ambient-a) 0%, transparent 100%),
+    radial-gradient(40% 44% at 74% 50%, var(--ambient-b) 0%, transparent 100%);
+  pointer-events:none;
+}
+
+.titlebar{
+  flex:none;height:44px;display:flex;align-items:center;gap:14px;
+  padding:0 16px;
+  box-shadow:inset 0 -1px 0 var(--hair);
+}
+.lights{display:flex;gap:8px;flex:none;margin-right:2px}
+.lights i{width:12px;height:12px;border-radius:50%;display:block}
+.lights i:nth-child(1){background:#ff5f57}
+.lights i:nth-child(2){background:#febc2e}
+.lights i:nth-child(3){background:#28c840}
+.appname{font-size:13px;font-weight:620;letter-spacing:-.008em}
+.tb-sp{flex:1}
+
+.statusbar{
+  flex:none;height:30px;display:flex;align-items:center;gap:12px;
+  padding:0 16px;
+  box-shadow:inset 0 1px 0 var(--hair);
+  font-size:11.5px;color:var(--fg2);
+}
+.statusbar .sp{flex:1}
+
+.workspace{flex:1;min-height:0;display:flex;overflow:hidden}
+
+/* a scroll container that should not need to scroll */
+.scroll{overflow-y:auto;overflow-x:hidden;min-height:0}
+.scroll::-webkit-scrollbar{width:9px}
+.scroll::-webkit-scrollbar-thumb{background:rgba(128,128,140,.38);border-radius:5px;
+  border:2px solid transparent;background-clip:padding-box}
+.scroll::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- type ---------- */
+.title{font-size:19px;font-weight:640;letter-spacing:-.019em;line-height:1.14;text-wrap:balance}
+.section-title{font-size:13px;font-weight:590;letter-spacing:-.005em;color:var(--fg1);text-wrap:balance}
+.label{font-size:13px;font-weight:400;color:var(--fg1)}
+.caption{font-size:11.5px;line-height:1.42;color:var(--fg2);text-wrap:pretty;max-width:62ch}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.dim{color:var(--fg2)}
+
+/* ---------- card ---------- */
+.card{
+  background:var(--card);
+  box-shadow:var(--card-edge);
+  border-radius:14px;
+  padding:12px;
+}
+.card-head{display:flex;align-items:center;gap:10px;height:26px;padding:0 4px;margin-bottom:6px}
+.card-head .sp{flex:1}
+
+/* ============================================================
+   SWITCH
+   ============================================================ */
+.switch{position:relative;display:inline-flex;flex:none;cursor:pointer}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.switch .track{
+  width:42px;height:26px;padding:3px;border-radius:9px;   /* 9 = 6 + 3 */
+  background:var(--trough);box-shadow:var(--lift);
+  display:block;
+  transition-property:background-color,box-shadow;
+  transition-duration:var(--calm);transition-timing-function:var(--ease);
+}
+.switch .knob{
+  display:block;width:20px;height:20px;border-radius:6px;
+  background:var(--thumb);
+  box-shadow:0 1px 2px rgba(0,0,0,.30),0 0 0 .5px rgba(0,0,0,.12);
+  transform:translateX(0);
+  transition-property:transform,background-color,scale;
+  transition-duration:var(--calm);transition-timing-function:var(--ease);
+}
+.switch input:checked + .track{
+  background:var(--accent);
+  box-shadow:0 0 0 1px rgba(0,0,0,.12) inset, 0 0 16px -4px var(--accent-glow);
+}
+.switch input:checked + .track .knob{transform:translateX(16px);background:#fff}
+.switch:active .knob{transition-duration:100ms;scale:.96}
+.switch input:focus-visible + .track{outline:2px solid var(--accent);outline-offset:3px}
+.switch::after{content:"";position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);width:44px;height:40px}
+
+/* small switch for dense bulb rows */
+.switch.sm .track{width:34px;height:21px;padding:2.5px;border-radius:7.5px}
+.switch.sm .knob{width:16px;height:16px;border-radius:5px}
+.switch.sm input:checked + .track .knob{transform:translateX(13px)}
+.switch.sm::after{width:36px;height:34px}
+
+/* ============================================================
+   TRIGGER LEVEL - the one glass sheet
+   ============================================================ */
+.glass{
+  position:relative;
+  padding:14px;border-radius:22px;              /* 22 = 8 + 14 */
+  background:var(--glass-fill);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);
+  backdrop-filter:blur(30px) saturate(180%);
+  box-shadow:var(--glass-edge),var(--glass-drop);
+}
+.hero-head{display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  padding:0 2px;margin-bottom:14px}
+.hero-head .section-title{font-size:14px;font-weight:620;letter-spacing:-.012em}
+.hero-value{font-size:27px;font-weight:620;letter-spacing:-.024em;line-height:1;color:var(--fg1)}
+
+.meter-block{padding:0 2px}
+.meter-wrap{position:relative;padding-bottom:22px}
+.meter{position:relative;display:flex;gap:2px;height:24px;border-radius:8px;align-items:stretch}
+.meter-seg{flex:1;border-radius:1.5px;background:var(--meter-off)}
+.meter-lit{
+  position:absolute;inset:0;display:flex;gap:2px;align-items:stretch;
+  clip-path:inset(0 24% 0 0);
+  animation:level 1.7s cubic-bezier(.3,.9,.4,1) infinite alternate;
+  will-change:clip-path;
+}
+.meter-lit .meter-seg{background:var(--meter-on)}
+.meter-lit .meter-seg.pk{background:var(--meter-pk)}
+@keyframes level{
+  0%{clip-path:inset(0 30% 0 0)}   18%{clip-path:inset(0 46% 0 0)}
+  37%{clip-path:inset(0 26% 0 0)}  55%{clip-path:inset(0 42% 0 0)}
+  76%{clip-path:inset(0 22% 0 0)}  100%{clip-path:inset(0 38% 0 0)}
+}
+.marker{
+  position:absolute;top:-6px;height:36px;width:3px;margin-left:-1.5px;
+  border-radius:2px;background:var(--accent);
+  box-shadow:0 0 14px -2px var(--accent-glow);
+  cursor:ew-resize;
+}
+.marker .grip{
+  position:absolute;left:50%;top:100%;margin-top:-2px;transform:translateX(-50%);
+  width:26px;height:11px;border-radius:4px;
+  background:var(--accent);
+  box-shadow:0 1px 2px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.35);
+  transition-property:transform,box-shadow;
+  transition-duration:var(--quick);transition-timing-function:var(--ease);
+}
+.marker::before{content:"";position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);width:40px;height:52px}
+.marker:hover .grip{box-shadow:0 2px 6px rgba(0,0,0,.40),inset 0 1px 0 rgba(255,255,255,.45)}
+.marker:active .grip{transform:translateX(-50%) scale(.96)}
+.marker:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:3px}
+
+/* ============================================================
+   CHECKBOX
+   ============================================================ */
+.check{position:relative;display:flex;align-items:center;gap:10px;cursor:pointer}
+.check input{position:absolute;width:1px;height:1px;opacity:0;margin:0}
+.check .box{
+  position:relative;flex:none;width:16px;height:16px;border-radius:5px;
+  background:var(--trough);box-shadow:var(--lift);
+  transition-property:background-color,box-shadow;
+  transition-duration:var(--quick);transition-timing-function:var(--ease);
+}
+.check .box::after{
+  content:"";position:absolute;left:5px;top:2px;width:5px;height:9px;
+  border:solid #fff;border-width:0 2px 2px 0;border-radius:1px;
+  transform:rotate(43deg) scale(.25);transform-origin:center;
+  opacity:0;filter:blur(4px);
+  transition-property:opacity,transform,filter;
+  transition-duration:300ms;transition-timing-function:var(--ease);
+}
+.check input:checked + .box{background:var(--accent);box-shadow:none}
+.check input:checked + .box::after{opacity:1;transform:rotate(43deg) scale(1);filter:blur(0)}
+.check input:focus-visible + .box{outline:2px solid var(--accent);outline-offset:3px}
+.check .box::before{content:"";position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);width:38px;height:38px}
+.check:active .box{transition-duration:100ms;scale:.96}
+
+/* ============================================================
+   SEGMENTED PICKER
+   ============================================================ */
+.segmented{
+  display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:2px;
+  padding:3px;border-radius:11px;                 /* 11 = 8 + 3 */
+  background:var(--trough);
+}
+.seg{
+  position:relative;
+  appearance:none;border:0;background:transparent;cursor:pointer;
+  font:inherit;font-size:13px;font-weight:400;color:var(--fg2);
+  height:30px;border-radius:8px;
+  white-space:nowrap;
+  transition-property:background-color,color,box-shadow,scale;
+  transition-duration:var(--quick);transition-timing-function:var(--ease);
+}
+.seg::after{content:"";position:absolute;inset:-5px 0}
+.seg:hover{color:var(--fg1)}
+.seg:active{transition-duration:100ms;scale:.96}
+.seg:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg[aria-checked="true"],.seg[aria-selected="true"]{
+  background:var(--raise);color:var(--accent);font-weight:590;box-shadow:var(--lift);
+}
+/* the driver picker: the one loud control */
+.segmented.driver{padding:4px;border-radius:13px}
+.segmented.driver .seg{height:34px;font-size:13.5px}
+.segmented.driver .seg[aria-checked="true"]{box-shadow:var(--lift),0 0 22px -8px var(--accent-glow)}
+
+/* ============================================================
+   ROW: label, slider, value
+   ============================================================ */
+.row{display:flex;align-items:center;gap:14px;min-height:34px}
+.row > .label{flex:none;width:76px}
+.row > .value{flex:none;min-width:70px;text-align:right;font-size:12.5px;color:var(--fg1)}
+.row > .value .unit{color:var(--fg2);font-weight:400;margin-left:4px}
+.row > .value .unit.pct{margin-left:0}
+
+.slider{flex:1;position:relative;height:34px;display:flex;align-items:center;min-width:60px}
+.track{position:relative;height:4px;border-radius:2px;background:var(--trough);width:100%;
+  box-shadow:inset 0 0 0 .5px rgba(128,128,140,.16)}
+.fill{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:var(--accent)}
+.thumb{
+  position:absolute;top:50%;width:18px;height:18px;margin-top:-9px;border-radius:6px;
+  left:calc(var(--p) * (100% - 18px) / 100);
+  background:var(--thumb);
+  box-shadow:0 0 0 .5px rgba(0,0,0,.18),0 1px 3px rgba(0,0,0,.30),
+             inset 0 1px 0 rgba(255,255,255,.22);
+  cursor:ew-resize;
+  transition-property:scale,box-shadow;
+  transition-duration:var(--quick);transition-timing-function:var(--ease);
+}
+.thumb::before{content:"";position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);width:38px;height:34px}
+.thumb:hover{box-shadow:0 0 0 .5px rgba(0,0,0,.20),0 2px 6px rgba(0,0,0,.34),
+             inset 0 1px 0 rgba(255,255,255,.28)}
+.thumb:active{transition-duration:100ms;scale:.96}
+.thumb:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+/* ============================================================
+   PALETTE
+   ============================================================ */
+.palette{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.palette.one-row{grid-template-columns:repeat(10,minmax(0,1fr))}
+.chip{
+  appearance:none;border:0;background:transparent;cursor:pointer;font:inherit;
+  display:flex;flex-direction:column;gap:4px;
+  padding:3px;border-radius:11px;                 /* 11 = 8 + 3 */
+  transition-property:background-color,box-shadow,scale;
+  transition-duration:var(--quick);transition-timing-function:var(--ease);
+}
+.chip .bar{
+  height:20px;border-radius:8px;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.20);
+}
+.chip .name{font-size:11px;line-height:1.2;color:var(--fg2);text-align:center;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  transition-property:color;transition-duration:var(--quick);transition-timing-function:var(--ease)}
+.chip:hover{background:var(--trough)}
+.chip:hover .name{color:var(--fg1)}
+.chip:active{transition-duration:100ms;scale:.96}
+.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chip[aria-checked="true"]{box-shadow:0 0 0 2px var(--accent)}
+.chip[aria-checked="true"] .name{color:var(--accent);font-weight:590}
+
+/* ============================================================
+   DISCLOSURE
+   ============================================================ */
+details > summary{list-style:none;cursor:pointer}
+details > summary::-webkit-details-marker{display:none}
+.disclosure summary{
+  display:flex;align-items:center;gap:8px;height:34px;
+  margin-left:-8px;padding:0 8px;
+  border-radius:8px;
+  transition-property:background-color;
+  transition-duration:var(--quick);transition-timing-function:var(--ease);
+}
+.disclosure summary:hover{background:var(--trough)}
+.disclosure summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.chevron{
+  flex:none;width:8px;height:8px;margin-left:1px;
+  border-right:1.8px solid var(--fg2);border-bottom:1.8px solid var(--fg2);
+  border-radius:0 0 2px 0;
+  transform:translateY(-2px) rotate(-45deg);
+  transition-property:transform;
+  transition-duration:var(--calm);transition-timing-function:var(--ease);
+}
+.disclosure[open] .chevron{transform:translateY(-3px) rotate(45deg)}
+.disclosure-body{display:flex;flex-direction:column;gap:2px;padding-top:2px}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn{
+  appearance:none;border:0;cursor:pointer;font:inherit;font-size:12.5px;
+  height:28px;padding:0 13px;border-radius:8px;
+  background:var(--raise);color:var(--fg1);box-shadow:var(--lift);
+  transition-property:background-color,box-shadow,scale,color;
+  transition-duration:var(--quick);transition-timing-function:var(--ease);
+}
+.btn:hover{background:var(--raise-hov);box-shadow:var(--lift-hov)}
+.btn:active{transition-duration:100ms;scale:.96}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.quiet{background:transparent;box-shadow:none;color:var(--fg2)}
+.btn.quiet:hover{background:var(--trough);color:var(--fg1);box-shadow:none}
+.btn.key{background:var(--accent);color:#1a1200;font-weight:590;
+  box-shadow:0 1px 2px rgba(0,0,0,.30),0 0 18px -6px var(--accent-glow)}
+.btn.key:hover{background:var(--accent)}
+.advtail{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+
+/* icon button, 28 visible, 40 hit */
+.iconbtn{
+  position:relative;appearance:none;border:0;background:transparent;cursor:pointer;
+  width:28px;height:28px;border-radius:8px;color:var(--fg2);
+  display:inline-flex;align-items:center;justify-content:center;flex:none;
+  transition-property:background-color,color,scale;
+  transition-duration:var(--quick);transition-timing-function:var(--ease);
+}
+.iconbtn:hover{background:var(--trough);color:var(--fg1)}
+.iconbtn:active{transition-duration:100ms;scale:.96}
+.iconbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.iconbtn::after{content:"";position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);width:40px;height:40px}
+.iconbtn svg{width:15px;height:15px;display:block;fill:none;stroke:currentColor;
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ============================================================
+   HOVER HELP - the (i) mark that replaced the captions
+   ============================================================ */
+.info{
+  position:relative;appearance:none;border:0;background:transparent;cursor:help;
+  width:15px;height:15px;flex:none;border-radius:50%;
+  color:var(--fg3);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:640;font-style:normal;line-height:1;
+  box-shadow:0 0 0 1.1px currentColor;
+  opacity:.7;
+  transition-property:color,opacity,scale;
+  transition-duration:var(--quick);transition-timing-function:var(--ease);
+  vertical-align:middle;
+}
+.info span{transform:translateY(.2px)}
+.info:hover,.info:focus-visible{color:var(--accent);opacity:1;outline:none}
+.info::after{content:"";position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);width:30px;height:30px}
+.tip{
+  position:absolute;z-index:40;left:50%;bottom:calc(100% + 9px);
+  width:238px;padding:9px 11px;border-radius:10px;
+  background:var(--tip-bg);color:var(--tip-fg);
+  box-shadow:0 0 0 1px rgba(255,255,255,.07),0 6px 20px -6px rgba(0,0,0,.65);
+  font-size:11.5px;line-height:1.42;font-weight:400;text-align:left;text-wrap:pretty;
+  pointer-events:none;
+  opacity:0;transform:translate(-50%,4px) scale(.96);filter:blur(4px);
+  transition-property:opacity,transform,filter;
+  transition-duration:200ms;transition-timing-function:var(--ease);
+}
+.info:hover .tip,.info:focus-visible .tip{
+  opacity:1;transform:translate(-50%,0) scale(1);filter:blur(0)
+}
+.tip.left{left:auto;right:-8px;transform:translate(0,4px) scale(.96);transform-origin:right bottom}
+.info:hover .tip.left,.info:focus-visible .tip.left{transform:translate(0,0) scale(1)}
+.tip.below{bottom:auto;top:calc(100% + 9px)}
+
+/* ============================================================
+   BULBS
+   ============================================================ */
+.swatch{
+  position:relative;appearance:none;border:0;cursor:pointer;font:inherit;flex:none;
+  width:34px;height:24px;border-radius:8px;padding:0;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.20),var(--lift);
+  transition-property:box-shadow,scale;
+  transition-duration:var(--quick);transition-timing-function:var(--ease);
+}
+.swatch:hover{box-shadow:inset 0 0 0 1px rgba(0,0,0,.20),var(--lift-hov)}
+.swatch:active{transition-duration:100ms;scale:.96}
+.swatch:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.swatch::before{content:"";position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);width:40px;height:34px}
+
+.bulbrow .fill,.bulbtile .fill,.striptile .fill{background:var(--meter-on)}
+.bulbrow{
+  display:flex;align-items:center;gap:12px;height:40px;padding:0 6px;
+  border-radius:9px;
+  transition-property:background-color;
+  transition-duration:var(--quick);transition-timing-function:var(--ease);
+}
+.bulbrow + .bulbrow{box-shadow:inset 0 1px 0 var(--hair)}
+.bulbrow:hover{background:var(--trough);box-shadow:none}
+.bulbrow:hover + .bulbrow{box-shadow:none}
+.bulbrow .nm{flex:none;width:74px;font-size:12.5px;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.bulbrow .pct{flex:none;width:34px;text-align:right;font-size:11.5px;color:var(--fg2)}
+.bulbrow.off .nm,.bulbrow.off .pct{color:var(--fg3)}
+.bulbrow.off .swatch{opacity:.45}
+
+/* 3 x 2 tile grid */
+.bulbgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.bulbtile{
+  display:flex;flex-direction:column;gap:5px;
+  padding:9px 10px;border-radius:12px;
+  background:var(--card);box-shadow:var(--card-edge);
+  transition-property:box-shadow;
+  transition-duration:var(--quick);transition-timing-function:var(--ease);
+}
+.bulbtile:hover{box-shadow:var(--lift-hov)}
+.bulbtile .t{display:flex;align-items:center;gap:9px}
+.bulbtile .nm{flex:1;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bulbtile .b{display:flex;align-items:center;gap:9px}
+.bulbtile .b .slider{height:22px}
+.bulbtile .pct{flex:none;width:32px;text-align:right;font-size:11px;color:var(--fg2)}
+.bulbtile.off .nm,.bulbtile.off .pct{color:var(--fg3)}
+.bulbtile.off .swatch{opacity:.45}
+
+/* persistent bottom strip */
+.bulbstrip{
+  flex:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;
+  padding:9px 16px 10px;
+  background:var(--win-hi);
+  box-shadow:inset 0 1px 0 var(--hair);
+}
+.striptile{
+  display:flex;flex-direction:column;gap:4px;
+  padding:7px 9px;border-radius:11px;
+  background:var(--card);box-shadow:var(--card-edge);
+}
+.striptile .t{display:flex;align-items:center;gap:8px}
+.striptile .nm{flex:1;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.striptile .pct{font-size:10.5px;color:var(--fg2);flex:none}
+.striptile .slider{height:18px}
+.striptile.off .nm,.striptile.off .pct{color:var(--fg3)}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sidebar{
+  flex:none;width:214px;display:flex;flex-direction:column;gap:2px;
+  padding:10px 10px;
+  background:rgba(0,0,0,.14);
+  box-shadow:inset -1px 0 0 var(--hair);
+}
+:root[data-theme="light"] .sidebar{background:rgba(0,0,0,.035)}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]) .sidebar{background:rgba(0,0,0,.035)}
+}
+.navitem{
+  position:relative;appearance:none;border:0;cursor:pointer;font:inherit;text-align:left;
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:8px 10px;border-radius:9px;background:transparent;
+  transition-property:background-color,box-shadow;
+  transition-duration:var(--quick);transition-timing-function:var(--ease);
+}
+.navitem:hover{background:var(--trough)}
+.navitem:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.navitem[aria-selected="true"]{background:var(--raise);box-shadow:var(--lift)}
+.navitem .ico{flex:none;width:17px;height:17px;color:var(--fg2);display:block}
+.navitem .ico svg{width:17px;height:17px;display:block;fill:none;stroke:currentColor;
+  stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.navitem[aria-selected="true"] .ico{color:var(--accent)}
+.navitem .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.navitem .n{font-size:13px;font-weight:400;color:var(--fg1);line-height:1.25}
+.navitem[aria-selected="true"] .n{font-weight:590}
+.navitem .s{font-size:11px;color:var(--fg2);line-height:1.25;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.navitem[aria-selected="true"] .s{color:var(--accent)}
+.sidebar .sp{flex:1}
+.sidebar-foot{padding:6px 10px 2px;font-size:11px;color:var(--fg3);
+  box-shadow:inset 0 1px 0 var(--hair);margin-top:6px}
+
+.pane{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.pane-head{flex:none;display:flex;align-items:center;gap:12px;padding:14px 20px 10px}
+.pane-head .sp{flex:1}
+.pane-body{flex:1;min-height:0;padding:0 20px 16px}
+
+/* ============================================================
+   SUMMARY ROW (schedule, collapsed)
+   ============================================================ */
+.summaryrow{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:8px 12px;border-radius:12px;
+  background:var(--card);box-shadow:var(--card-edge);
+  cursor:pointer;text-align:left;font:inherit;appearance:none;border:0;
+  transition-property:background-color,box-shadow;
+  transition-duration:var(--quick);transition-timing-function:var(--ease);
+}
+.summaryrow:hover{box-shadow:var(--lift-hov)}
+.summaryrow:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.summaryrow .sp{flex:1}
+
+/* ============================================================
+   ENTER: one orchestrated sequence, split and staggered
+   ============================================================ */
+.enter{opacity:0;transform:translateY(10px);filter:blur(4px);
+  animation:rise 420ms var(--ease) forwards}
+.e1{animation-delay:0ms}
+.e2{animation-delay:90ms}
+.e3{animation-delay:180ms}
+.e4{animation-delay:270ms}
+@keyframes rise{to{opacity:1;transform:translateY(0);filter:blur(0)}}
+
+@media (prefers-reduced-motion:reduce){
+  .enter{opacity:1;transform:none;filter:none;animation:none}
+  .meter-lit{animation:none;clip-path:inset(0 34% 0 0)}
+  *,*::before,*::after{transition-duration:.01ms !important}
+}
+
+
+/* ---------- C: compact stack ---------- */
+.stack{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;
+  padding:10px 16px}
+.stack > section{flex:none}
+.headline{display:flex;align-items:center;gap:10px;height:24px}
+.headline .sp{flex:1}
+.effectfeel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.row > .label{width:78px}
+.row.wide > .label{width:100px}
+.driverline{display:flex;align-items:center;gap:12px}
+.driverline .segmented{flex:1;max-width:420px}
+.runpill{display:inline-flex;align-items:center;gap:7px;height:22px;padding:0 10px;
+  border-radius:7px;background:var(--accent-soft);color:var(--accent);
+  font-size:11.5px;font-weight:590}
+.runpill i{width:6px;height:6px;border-radius:2px;background:var(--accent);display:block}
+.bulbtile{padding:7px 10px 8px;gap:6px}
+.bulbtile .b .slider{height:20px}
+/* the swatch sits above the brightness thumb, so their hit areas must not meet */
+.bulbtile .swatch::before{height:28px}
+.bulbtile .thumb::before{height:24px}
+.schedmore{margin-top:10px;padding-top:10px;box-shadow:inset 0 1px 0 var(--hair)}
+.schedgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.glass{padding:12px;border-radius:20px}
+.hero-head{margin-bottom:10px}
+.meter-wrap{padding-bottom:20px}
+
+</style></head>
+<body>
+
+<div class="app">
+
+  <div class="titlebar">
+    <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="appname">Glowbeat</span>
+    <span class="tb-sp"></span>
+    <span class="runpill"><i></i>Party Mode running</span>
+    <button class='iconbtn' type='button' data-theme-toggle aria-label='Switch theme'><svg viewBox='0 0 15 15' aria-hidden='true'><circle cx='7.5' cy='7.5' r='2.9'/><path d='M7.5 1.2v1.5m0 9.6v1.5M1.2 7.5h1.5m9.6 0h1.5M3.1 3.1l1.1 1.1m6.2 6.2 1.1 1.1m0-8.4-1.1 1.1m-6.2 6.2-1.1 1.1'/></svg></button><button class='iconbtn' type='button' aria-label='Settings'><svg viewBox='0 0 15 15' aria-hidden='true'><path d='M2 4.7h11M2 10.3h11'/><circle cx='5.4' cy='4.7' r='1.9'/><circle cx='9.6' cy='10.3' r='1.9'/></svg></button>
+  </div>
+
+  <div class="stack" data-fit="stack">
+
+    <section class="enter e1">
+      <div class="headline">
+        <h2 class="section-title">Bulbs</h2>
+        <button class='info' type='button' aria-label='Click a bulb tile to open its color, temperature and identify controls.'><span aria-hidden='true'>i</span><span class='tip ' aria-hidden='true'>Click a bulb tile to open its color, temperature and identify controls.</span></button>
+        <span class="sp"></span>
+        <button class="btn quiet" type="button">All on</button>
+      </div>
+      <div style="margin-top:7px"><div class='bulbgrid'><div class='bulbtile'><div class='t'><label class='switch sm'><input type='checkbox' checked aria-label='Bulb 1 power'><span class='track'><span class='knob'></span></span></label><span class='nm'>Bulb 1</span><button class='swatch' type='button' style='background:linear-gradient(150deg,#fff6e6,#ffe3b4)' aria-label='Bulb 1 color, 4000 K'></button></div><div class='b'><div class='slider'><div class='track'><div class='fill' style='width:100%'></div><div class='thumb' style='--p:100' role='slider' tabindex='0' aria-label='Bulb 1 brightness' aria-valuemin='0' aria-valuemax='100' aria-valuenow='100'></div></div></div><span class='pct num'>100%</span></div></div><div class='bulbtile'><div class='t'><label class='switch sm'><input type='checkbox' checked aria-label='Bulb 2 power'><span class='track'><span class='knob'></span></span></label><span class='nm'>Bulb 2</span><button class='swatch' type='button' style='background:linear-gradient(150deg,#fff6e6,#ffe3b4)' aria-label='Bulb 2 color, 4000 K'></button></div><div class='b'><div class='slider'><div class='track'><div class='fill' style='width:100%'></div><div class='thumb' style='--p:100' role='slider' tabindex='0' aria-label='Bulb 2 brightness' aria-valuemin='0' aria-valuemax='100' aria-valuenow='100'></div></div></div><span class='pct num'>100%</span></div></div><div class='bulbtile'><div class='t'><label class='switch sm'><input type='checkbox' checked aria-label='Kitchen power'><span class='track'><span class='knob'></span></span></label><span class='nm'>Kitchen</span><button class='swatch' type='button' style='background:linear-gradient(150deg,#ffe9c2,#ffc978)' aria-label='Kitchen color, 2700 K'></button></div><div class='b'><div class='slider'><div class='track'><div class='fill' style='width:80%'></div><div class='thumb' style='--p:80' role='slider' tabindex='0' aria-label='Kitchen brightness' aria-valuemin='0' aria-valuemax='100' aria-valuenow='80'></div></div></div><span class='pct num'>80%</span></div></div><div class='bulbtile'><div class='t'><label class='switch sm'><input type='checkbox' checked aria-label='Bulb 4 power'><span class='track'><span class='knob'></span></span></label><span class='nm'>Bulb 4</span><button class='swatch' type='button' style='background:linear-gradient(150deg,#9a5cff,#5a1bd6)' aria-label='Bulb 4 color, Violet'></button></div><div class='b'><div class='slider'><div class='track'><div class='fill' style='width:100%'></div><div class='thumb' style='--p:100' role='slider' tabindex='0' aria-label='Bulb 4 brightness' aria-valuemin='0' aria-valuemax='100' aria-valuenow='100'></div></div></div><span class='pct num'>100%</span></div></div><div class='bulbtile off'><div class='t'><label class='switch sm'><input type='checkbox' aria-label='Desk lamp power'><span class='track'><span class='knob'></span></span></label><span class='nm'>Desk lamp</span><button class='swatch' type='button' style='background:linear-gradient(150deg,#fff1dc,#ffd9a3)' aria-label='Desk lamp color, 3500 K'></button></div><div class='b'><div class='slider'><div class='track'><div class='fill' style='width:45%'></div><div class='thumb' style='--p:45' role='slider' tabindex='0' aria-label='Desk lamp brightness' aria-valuemin='0' aria-valuemax='100' aria-valuenow='45'></div></div></div><span class='pct num'>45%</span></div></div><div class='bulbtile'><div class='t'><label class='switch sm'><input type='checkbox' checked aria-label='Bulb 6 power'><span class='track'><span class='knob'></span></span></label><span class='nm'>Bulb 6</span><button class='swatch' type='button' style='background:linear-gradient(150deg,#fff6e6,#ffe3b4)' aria-label='Bulb 6 color, 4000 K'></button></div><div class='b'><div class='slider'><div class='track'><div class='fill' style='width:100%'></div><div class='thumb' style='--p:100' role='slider' tabindex='0' aria-label='Bulb 6 brightness' aria-valuemin='0' aria-valuemax='100' aria-valuenow='100'></div></div></div><span class='pct num'>100%</span></div></div></div></div>
+    </section>
+
+    <section class="enter e1">
+      <details class="disclosure" id="sched">
+        <summary class="summaryrow">
+          <span class="chevron"></span>
+          <span class="label">Schedule</span>
+          <span class="caption num" style="margin-left:2px">Daylight. Wake 6:30 AM, sleep 11:00 PM.</span>
+          <span class="sp"></span>
+          <span class="caption num">Next: wake 6:30 AM tomorrow</span>
+          <label class='switch'><input type='checkbox' checked aria-label='Schedule'><span class='track'><span class='knob'></span></span></label>
+        </summary>
+        <div class="schedmore">
+          <div class="schedgrid">
+            <div>
+              <div class="card-head" style="padding:0;margin-bottom:6px">
+                <span class="label">Light mode</span>
+                <button class='info' type='button' aria-label='Auto follows sunrise and sunset where you are.'><span aria-hidden='true'>i</span><span class='tip ' aria-hidden='true'>Auto follows sunrise and sunset where you are.</span></button>
+              </div>
+              <div class='segmented ' role='radiogroup' aria-label='Light mode'><button class='seg' type='button' role='radio' aria-checked='true' >Daylight</button><button class='seg' type='button' role='radio' aria-checked='false' >Night</button><button class='seg' type='button' role='radio' aria-checked='false' >Auto</button></div>
+              <div class='row wide'><span class='label'>Shift over</span><div class='slider'><div class='track'><div class='fill' style='width:25%'></div><div class='thumb' style='--p:25' role='slider' tabindex='0' aria-label='Shift over' aria-valuemin='0' aria-valuemax='100' aria-valuenow='25' aria-valuetext='30 minutes'></div></div></div><span class='value num'>30<span class='unit'>min</span></span></div>
+            </div>
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;height:26px">
+                <span class="label">Wake</span><span class="sp" style="flex:1"></span>
+                <span class="value num" style="font-size:12.5px">6:30 AM</span>
+              </div>
+              <div class='row wide'><span class='label'>Light up over</span><div class='slider'><div class='track'><div class='fill' style='width:25%'></div><div class='thumb' style='--p:25' role='slider' tabindex='0' aria-label='Light up over' aria-valuemin='0' aria-valuemax='100' aria-valuenow='25' aria-valuetext='15 minutes'></div></div></div><span class='value num'>15<span class='unit'>min</span></span></div>
+              <div class='row wide'><span class='label'>Brightness</span><div class='slider'><div class='track'><div class='fill' style='width:70%'></div><div class='thumb' style='--p:70' role='slider' tabindex='0' aria-label='Wake brightness' aria-valuemin='0' aria-valuemax='100' aria-valuenow='70' aria-valuetext='70 percent'></div></div></div><span class='value num'>70<span class='unit pct'>%</span></span></div>
+            </div>
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;height:26px">
+                <span class="label">Sleep</span><span class="sp" style="flex:1"></span>
+                <span class="value num" style="font-size:12.5px">11:00 PM</span>
+              </div>
+              <div class='row wide'><span class='label'>Dim over</span><div class='slider'><div class='track'><div class='fill' style='width:33%'></div><div class='thumb' style='--p:33' role='slider' tabindex='0' aria-label='Dim over' aria-valuemin='0' aria-valuemax='100' aria-valuenow='33' aria-valuetext='20 minutes'></div></div></div><span class='value num'>20<span class='unit'>min</span></span></div>
+            </div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section class="enter e2">
+      <div class="driverline">
+        <span class="label dim">Driver</span>
+        <div class='segmented driver' role='tablist' aria-label='Driver'><button class='seg' type='button' role='tab' aria-selected='false' >Manual</button><button class='seg' type='button' role='tab' aria-selected='false' >Scene</button><button class='seg' type='button' role='tab' aria-selected='true' >Party</button></div>
+        <button class='info' type='button' aria-label='One driver at a time. Picking Scene or Manual stops Party Mode.'><span aria-hidden='true'>i</span><span class='tip ' aria-hidden='true'>One driver at a time. Picking Scene or Manual stops Party Mode.</span></button>
+      </div>
+    </section>
+
+    <div id="panels" style="display:flex;flex-direction:column;gap:10px">
+      <div data-panel-id="manual" hidden><div class='enter e2'><div class='card-head' style='padding:0;margin-bottom:8px'><h3 class='section-title'>All bulbs</h3><button class='info' type='button' aria-label='Manual holds the bulbs at whatever you set. Nothing moves on its own.'><span aria-hidden='true'>i</span><span class='tip ' aria-hidden='true'>Manual holds the bulbs at whatever you set. Nothing moves on its own.</span></button></div><div class='segmented ' role='radiogroup' aria-label='Light kind'><button class='seg' type='button' role='radio' aria-checked='true' >White</button><button class='seg' type='button' role='radio' aria-checked='false' >Color</button></div><div style='margin-top:12px'><div class='row wide'><span class='label'>Brightness</span><div class='slider'><div class='track'><div class='fill' style='width:100%'></div><div class='thumb' style='--p:100' role='slider' tabindex='0' aria-label='Brightness' aria-valuemin='0' aria-valuemax='100' aria-valuenow='100' aria-valuetext='100 percent'></div></div></div><span class='value num'>100<span class='unit pct'>%</span></span></div><div class='row wide'><span class='label'>Warmth</span><div class='slider'><div class='track'><div class='fill' style='width:42%'></div><div class='thumb' style='--p:42' role='slider' tabindex='0' aria-label='Warmth' aria-valuemin='0' aria-valuemax='100' aria-valuenow='42' aria-valuetext='4000 kelvin'></div></div></div><span class='value num'>4000<span class='unit'>K</span></span></div></div><div style='margin-top:6px;display:flex;gap:8px'><button class='btn' type='button'>All on</button><button class='btn' type='button'>All off</button><button class='btn' type='button'>Identify all</button></div></div></div>
+      <div data-panel-id="scene" hidden><div class='enter e2'><div class='card-head' style='padding:0;margin-bottom:8px'><h3 class='section-title'>Scene</h3><button class='info' type='button' aria-label='A scene is a slow, steady look that ignores the music.'><span aria-hidden='true'>i</span><span class='tip ' aria-hidden='true'>A scene is a slow, steady look that ignores the music.</span></button></div><div class='segmented ' role='radiogroup' aria-label='Scene'><button class='seg' type='button' role='radio' aria-checked='false' >Breathe</button><button class='seg' type='button' role='radio' aria-checked='true' >Color flow</button><button class='seg' type='button' role='radio' aria-checked='false' >Candle</button><button class='seg' type='button' role='radio' aria-checked='false' >Sunset</button><button class='seg' type='button' role='radio' aria-checked='false' >Static</button></div><p class='caption' style='margin-top:8px'>The palette drifts from bulb to bulb.</p><div style='margin-top:10px'><div class='row'><span class='label'>Speed</span><div class='slider'><div class='track'><div class='fill' style='width:50%'></div><div class='thumb' style='--p:50' role='slider' tabindex='0' aria-label='Speed' aria-valuemin='0' aria-valuemax='100' aria-valuenow='50' aria-valuetext='1.0 times'></div></div></div><span class='value num'>1.0<span class='unit'>x</span></span></div></div><section><div class='card-head' style='margin-bottom:4px;padding:0'><h3 class='section-title'>Palette</h3><button class='info' type='button' aria-label='The colors Party Mode and Scenes draw from.'><span aria-hidden='true'>i</span><span class='tip ' aria-hidden='true'>The colors Party Mode and Scenes draw from.</span></button></div><div class='palette' role='radiogroup' aria-label='Palette'><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#ff2d55,#ffcc00 38%,#34c759 68%,#0a84ff)'></span><span class='name'>Party</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#ff3b1f,#ff8a00 55%,#ffd27f)'></span><span class='name'>Sunset</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#0540a8,#00a3c4 55%,#5ce1e6)'></span><span class='name'>Ocean</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#ff00d4,#00fff0 52%,#8cff00)'></span><span class='name'>Neon</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#ffcf94,#fff3e2 52%,#ffe0b0)'></span><span class='name'>Warm white</span></button><button class='chip' type='button' role='radio' aria-checked='true'><span class='bar' style='background:linear-gradient(100deg,#2400a8,#6a1bff 34%,#b14bff 62%,#3a18ff)'></span><span class='name'>Blacklight</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#08461a,#2fa84f 55%,#9ad64f)'></span><span class='name'>Forest</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#ff5fb8,#ffa8e2 50%,#b48dff)'></span><span class='name'>Candy</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#8fd6ff,#d8f2ff 50%,#6fc6ff)'></span><span class='name'>Ice</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#6b0a00,#ff3b00 52%,#ffb300)'></span><span class='name'>Fire</span></button></div></section></div></div>
+      <div data-panel-id="party" style="display:flex;flex-direction:column;gap:10px"><div class='enter e2'><div class='glass'><div class='hero-head'><h3 class='section-title'>Trigger Level</h3><span class='hero-value num'>58%</span></div><div class='meter-block'><div class='meter-wrap'><div class='meter' role='meter' aria-label='Input level' aria-valuemin='0' aria-valuemax='100' aria-valuenow='66'><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><div class='meter-lit' aria-hidden='true'><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg'></span><span class='meter-seg pk'></span><span class='meter-seg pk'></span><span class='meter-seg pk'></span><span class='meter-seg pk'></span><span class='meter-seg pk'></span></div></div><div class='marker' style='left:58%' role='slider' tabindex='0' aria-label='Trigger level' aria-valuemin='0' aria-valuemax='100' aria-valuenow='58' aria-valuetext='58 percent'><span class='grip'></span></div></div><p class='caption' style='margin-top:12px'>Lights kick in when the music is louder than the marker.</p></div><label class='check' style='margin-top:12px'><input type='checkbox' aria-label='Always react'><span class='box'></span><span class='label'>Always react</span><button class='info' type='button' aria-label='Always react: the lights answer every sound, no matter how quiet.'><span aria-hidden='true'>i</span><span class='tip ' aria-hidden='true'>Always react: the lights answer every sound, no matter how quiet.</span></button></label></div></div><div class='effectfeel enter e3'><section><div class='card-head' style='margin-bottom:4px;padding:0'><h3 class='section-title'>Effect</h3><button class='info' type='button' aria-label='Effect is the shape of the reaction. Pulse flashes every bulb together on the beat. Spread, Wave and Glow move the color around the room instead.'><span aria-hidden='true'>i</span><span class='tip ' aria-hidden='true'>Effect is the shape of the reaction. Pulse flashes every bulb together on the beat. Spread, Wave and Glow move the color around the room instead.</span></button></div><div class='segmented ' role='radiogroup' aria-label='Effect'><button class='seg' type='button' role='radio' aria-checked='true' >Pulse</button><button class='seg' type='button' role='radio' aria-checked='false' >Spread</button><button class='seg' type='button' role='radio' aria-checked='false' >Wave</button><button class='seg' type='button' role='radio' aria-checked='false' >Glow</button></div></section><section><div class='card-head' style='margin-bottom:4px;padding:0'><h3 class='section-title'>Feel</h3><button class='info' type='button' aria-label='Feel is a shortcut for the four Advanced sliders. Punchy is fast and bright. Pick Custom to keep your own settings.'><span aria-hidden='true'>i</span><span class='tip ' aria-hidden='true'>Feel is a shortcut for the four Advanced sliders. Punchy is fast and bright. Pick Custom to keep your own settings.</span></button></div><div class='segmented ' role='radiogroup' aria-label='Feel'><button class='seg' type='button' role='radio' aria-checked='true' >Punchy</button><button class='seg' type='button' role='radio' aria-checked='false' >Mellow</button><button class='seg' type='button' role='radio' aria-checked='false' >Dreamy</button><button class='seg' type='button' role='radio' aria-checked='false' >Tight</button><button class='seg' type='button' role='radio' aria-checked='false' >Custom</button></div></section></div><div class='enter e3'><section><div class='card-head' style='margin-bottom:4px;padding:0'><h3 class='section-title'>Palette</h3><button class='info' type='button' aria-label='The colors Party Mode and Scenes draw from.'><span aria-hidden='true'>i</span><span class='tip ' aria-hidden='true'>The colors Party Mode and Scenes draw from.</span></button></div><div class='palette one-row' role='radiogroup' aria-label='Palette'><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#ff2d55,#ffcc00 38%,#34c759 68%,#0a84ff)'></span><span class='name'>Party</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#ff3b1f,#ff8a00 55%,#ffd27f)'></span><span class='name'>Sunset</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#0540a8,#00a3c4 55%,#5ce1e6)'></span><span class='name'>Ocean</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#ff00d4,#00fff0 52%,#8cff00)'></span><span class='name'>Neon</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#ffcf94,#fff3e2 52%,#ffe0b0)'></span><span class='name'>Warm white</span></button><button class='chip' type='button' role='radio' aria-checked='true'><span class='bar' style='background:linear-gradient(100deg,#2400a8,#6a1bff 34%,#b14bff 62%,#3a18ff)'></span><span class='name'>Blacklight</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#08461a,#2fa84f 55%,#9ad64f)'></span><span class='name'>Forest</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#ff5fb8,#ffa8e2 50%,#b48dff)'></span><span class='name'>Candy</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#8fd6ff,#d8f2ff 50%,#6fc6ff)'></span><span class='name'>Ice</span></button><button class='chip' type='button' role='radio' aria-checked='false'><span class='bar' style='background:linear-gradient(100deg,#6b0a00,#ff3b00 52%,#ffb300)'></span><span class='name'>Fire</span></button></div></section></div><div class='enter e4'><section><details class='disclosure'><summary><span class='chevron'></span><h3 class='section-title'>Advanced</h3><button class='info' type='button' aria-label='Darkest and Brightest are the two ends the bulbs travel between. Snap is how fast they jump on a hit, Fade is how slowly they settle.'><span aria-hidden='true'>i</span><span class='tip left' aria-hidden='true'>Darkest and Brightest are the two ends the bulbs travel between. Snap is how fast they jump on a hit, Fade is how slowly they settle.</span></button><span class='sp' style='flex:1'></span><button class='btn quiet' type='button'>Reset</button><button class='btn key' type='button'>Save as default</button></summary><div class='disclosure-body'><div class='row'><span class='label'>Darkest</span><div class='slider'><div class='track'><div class='fill' style='width:10%'></div><div class='thumb' style='--p:10' role='slider' tabindex='0' aria-label='Darkest' aria-valuemin='0' aria-valuemax='100' aria-valuenow='10' aria-valuetext='10 percent'></div></div></div><span class='value num'>10<span class='unit pct'>%</span></span></div><div class='row'><span class='label'>Brightest</span><div class='slider'><div class='track'><div class='fill' style='width:100%'></div><div class='thumb' style='--p:100' role='slider' tabindex='0' aria-label='Brightest' aria-valuemin='0' aria-valuemax='100' aria-valuenow='100' aria-valuetext='100 percent'></div></div></div><span class='value num'>100<span class='unit pct'>%</span></span></div><div class='row'><span class='label'>Snap</span><div class='slider'><div class='track'><div class='fill' style='width:100%'></div><div class='thumb' style='--p:100' role='slider' tabindex='0' aria-label='Snap' aria-valuemin='0' aria-valuemax='100' aria-valuenow='100' aria-valuetext='instant'></div></div></div><span class='value num'>instant</span></div><div class='row'><span class='label'>Fade</span><div class='slider'><div class='track'><div class='fill' style='width:30%'></div><div class='thumb' style='--p:30' role='slider' tabindex='0' aria-label='Fade' aria-valuemin='0' aria-valuemax='100' aria-valuenow='30' aria-valuetext='0.3 seconds'></div></div></div><span class='value num'>0.3<span class='unit'>s</span></span></div></div></details></section></div></div>
+    </div>
+
+  </div>
+
+  <div class='statusbar'><span class='num'>6 bulbs. Listening to system audio.</span><span class='sp'></span><button class='btn quiet' type='button'>Setup guide</button><button class='btn quiet' type='button'>Rescan</button></div>
+</div>
+
+<script>
+/* theme: dark is the default, ?theme=light for the light pass */
+(function(){
+  var t = new URLSearchParams(location.search).get('theme');
+  if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+})();
+
+/* segmented pickers and sidebar nav: single selection, roving tab stop */
+document.addEventListener('click', function(e){
+  var b = e.target.closest('[role="radio"],[role="tab"]');
+  if (!b) return;
+  var group = b.closest('[role="radiogroup"],[role="tablist"]');
+  if (!group) return;
+  var key = b.getAttribute('role') === 'tab' ? 'aria-selected' : 'aria-checked';
+  group.querySelectorAll('[' + key + ']').forEach(function(x){ x.setAttribute(key, 'false'); });
+  b.setAttribute(key, 'true');
+  var panels = b.getAttribute('data-panel');
+  if (panels){
+    var host = document.getElementById(b.getAttribute('data-host') || 'panels');
+    if (host) host.querySelectorAll('[data-panel-id]').forEach(function(p){
+      p.hidden = (p.getAttribute('data-panel-id') !== panels);
+    });
+  }
+  var st = b.getAttribute('data-status');
+  if (st){
+    var slot = document.getElementById(b.getAttribute('data-status-slot') || '');
+    if (slot) slot.textContent = st;
+  }
+});
+
+/* the theme switch in the title bar */
+document.addEventListener('click', function(e){
+  var b = e.target.closest('[data-theme-toggle]');
+  if (!b) return;
+  var root = document.documentElement;
+  var now = root.getAttribute('data-theme');
+  if (!now) now = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  root.setAttribute('data-theme', now === 'dark' ? 'light' : 'dark');
+});
+
+</script>
+</body></html>

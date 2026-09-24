@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glowbeat app icon concepts</title>
+<style>
+  :root{
+    --bg:#0D0C12;
+    --surface:#16151D;
+    --surface-2:#1D1C26;
+    --line:rgba(255,255,255,.10);
+    --text:#EDEBF2;
+    --muted:#9A97A8;
+    --accent:#B026FF;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-font-smoothing:antialiased}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:56px 28px 96px}
+  header h1{
+    font-size:34px;line-height:1.15;margin:0 0 10px;letter-spacing:-.02em;font-weight:680;
+    background:linear-gradient(92deg,#FF0044,#FF9500,#FFE800,#00E5FF,#B026FF);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  header p{margin:0 0 6px;color:var(--muted);max-width:62ch}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 0}
+  .chip{display:flex;align-items:center;gap:8px;padding:6px 11px 6px 7px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--muted)}
+  .chip i{width:44px;height:14px;border-radius:7px;display:block}
+  hr.rule{border:0;border-top:1px solid var(--line);margin:44px 0}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:26px 26px 30px;margin:0 0 30px}
+  .card h2{font-size:21px;margin:0 0 4px;letter-spacing:-.01em;font-weight:660}
+  .card h2 .num{color:var(--muted);font-weight:500;margin-right:8px}
+  .rationale{margin:0 0 22px;color:#CFCBDA;max-width:66ch}
+
+  .panel{border-radius:16px;padding:26px 28px;margin:0 0 14px;border:1px solid rgba(0,0,0,.2)}
+  .panel.light{background:linear-gradient(158deg,#F4F1EC 0%,#DED8CE 58%,#CCC4B7 100%)}
+  .panel.dark{background:linear-gradient(158deg,#26252F 0%,#15141B 58%,#0A090F 100%);border-color:rgba(255,255,255,.07)}
+  .panel .plabel{font-size:11px;letter-spacing:.09em;text-transform:uppercase;margin:0 0 18px;font-weight:600}
+  .panel.light .plabel{color:#6B6357}
+  .panel.dark .plabel{color:#7E7B8C}
+
+  .shelf{display:flex;align-items:flex-end;gap:30px;padding:20px 26px;border-radius:20px}
+  .panel.light .shelf{background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.75);box-shadow:0 2px 14px rgba(0,0,0,.09)}
+  .panel.dark .shelf{background:rgba(255,255,255,.065);border:1px solid rgba(255,255,255,.09)}
+
+  .ic{display:flex;flex-direction:column;align-items:center;gap:9px}
+  .ic .cap{font-size:11px;letter-spacing:.03em}
+  .panel.light .ic .cap{color:#6B6357}
+  .panel.dark .ic .cap{color:#848193}
+  .ic svg{display:block}
+  .s512{filter:drop-shadow(0 10px 22px rgba(0,0,0,.34))}
+  .s128{filter:drop-shadow(0 4px 9px rgba(0,0,0,.32))}
+  .s32{filter:drop-shadow(0 1px 3px rgba(0,0,0,.3))}
+
+  .mbwrap{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+  .mb{border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+  .mbbar{display:flex;align-items:center;gap:14px;height:26px;padding:0 12px;font-size:12px}
+  .mb.light .mbbar{background:#F3F2F5;color:rgba(0,0,0,.82);border-bottom:1px solid rgba(0,0,0,.1)}
+  .mb.dark .mbbar{background:#1A1A1E;color:rgba(255,255,255,.85);border-bottom:1px solid rgba(255,255,255,.08)}
+  .mbbar .spacer{flex:1}
+  .mbbar svg{display:block}
+  .mbzoom{display:flex;align-items:center;gap:14px;padding:13px 12px;font-size:11px}
+  .mb.light .mbzoom{background:#FAFAFC;color:#6B6878}
+  .mb.dark .mbzoom{background:#0F0F13;color:#7E7B8C}
+
+  .note{display:flex;gap:10px;margin:20px 0 0;padding:13px 15px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+  .note b{color:#fff;font-weight:600}
+  .note .k{flex:0 0 auto;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);font-weight:700;padding-top:2px}
+  .note p{margin:0;font-size:14px;color:#C3BFD0}
+
+  .exports{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:22px}
+  .ex{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;text-align:center}
+  .ex .frame{background:
+      linear-gradient(45deg,rgba(255,255,255,.045) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.045) 75%),
+      linear-gradient(45deg,rgba(255,255,255,.045) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.045) 75%);
+    background-size:16px 16px;background-position:0 0,8px 8px;border-radius:10px;padding:6px}
+  .ex h3{font-size:14px;margin:12px 0 2px;font-weight:600}
+  .ex small{color:var(--muted);font-size:11.5px}
+  button.copy{margin-top:11px;width:100%;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);font:inherit;font-size:12.5px;cursor:pointer}
+  button.copy:hover{background:#262532}
+  h2.sec{font-size:22px;margin:0 0 8px;letter-spacing:-.01em}
+  p.seclead{color:var(--muted);margin:0;max-width:70ch}
+</style>
+</head>
+<body>
+
+<!-- ============ MASTER DEFS + CONCEPT SYMBOLS (hidden) ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs id="gb-shared">
+    <!-- macOS continuous-corner squircle, superellipse n=5, ~22.4% corner radius -->
+    <path id="sq" d="M1024 512C1024 566 1024 631.5 1023.7 673.9C1023.2 716.2 1022.9 737.8 1020.9 766.2C1018.9 794.6 1016.5 820.5 1011.6 844.2C1006.8 867.9 1000.7 889.5 991.7 908.4C982.7 927.3 971.6 943.8 957.7 957.7C943.8 971.6 927.3 982.7 908.4 991.7C889.5 1000.7 867.9 1006.8 844.2 1011.6C820.5 1016.5 794.6 1018.9 766.2 1020.9C737.8 1022.9 716.2 1023.2 673.9 1023.7C631.5 1024 566 1024 512 1024C458 1024 392.5 1024 350.1 1023.7C307.8 1023.2 286.2 1022.9 257.8 1020.9C229.4 1018.9 203.5 1016.5 179.8 1011.6C156.1 1006.8 134.5 1000.7 115.6 991.7C96.7 982.7 80.2 971.6 66.3 957.7C52.4 943.8 41.3 927.3 32.3 908.4C23.3 889.5 17.2 867.9 12.4 844.2C7.5 820.5 5.1 794.6 3.1 766.2C1.1 737.8 0.8 716.2 0.3 673.9C0 631.5 0 566 0 512C0 458 0 392.5 0.3 350.1C0.8 307.8 1.1 286.2 3.1 257.8C5.1 229.4 7.5 203.5 12.4 179.8C17.2 156.1 23.3 134.5 32.3 115.6C41.3 96.7 52.4 80.2 66.3 66.3C80.2 52.4 96.7 41.3 115.6 32.3C134.5 23.3 156.1 17.2 179.8 12.4C203.5 7.5 229.4 5.1 257.8 3.1C286.2 1.1 307.8 0.8 350.1 0.3C392.5 0 458 0 512 0C566 0 631.5 0 673.9 0.3C716.2 0.8 737.8 1.1 766.2 3.1C794.6 5.1 820.5 7.5 844.2 12.4C867.9 17.2 889.5 23.3 908.4 32.3C927.3 41.3 943.8 52.4 957.7 66.3C971.6 80.2 982.7 96.7 991.7 115.6C1000.7 134.5 1006.8 156.1 1011.6 179.8C1016.5 203.5 1018.9 229.4 1020.9 257.8C1022.9 286.2 1023.2 307.8 1023.7 350.1C1024 392.5 1024 458 1024 512Z"/>
+    <clipPath id="sqClip"><use href="#sq"/></clipPath>
+
+    <!-- Apple-style tile lighting: top-lit sheen, bottom-biased inner shadow, hairline edge -->
+    <linearGradient id="topLit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".20"/>
+      <stop offset=".17" stop-color="#ffffff" stop-opacity=".07"/>
+      <stop offset=".50" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="innerSoft" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="24"/>
+    </filter>
+    <g id="chrome">
+      <use href="#sq" fill="url(#topLit)"/>
+      <use href="#sq" fill="none" stroke="#000000" stroke-opacity=".5" stroke-width="58" filter="url(#innerSoft)" transform="translate(0,-16)"/>
+      <use href="#sq" fill="none" stroke="#ffffff" stroke-opacity=".28" stroke-width="4"/>
+    </g>
+  </defs>
+
+  <!-- ---------- CONCEPT 1: BULB + WAVEFORM ---------- -->
+  <symbol id="tile1" viewBox="0 0 1024 1024">
+    <defs>
+      <radialGradient id="c1bg" cx=".5" cy=".34" r=".86">
+        <stop offset="0" stop-color="#7B20EA"/>
+        <stop offset=".42" stop-color="#3C0C8A"/>
+        <stop offset="1" stop-color="#10032A"/>
+      </radialGradient>
+      <radialGradient id="c1halo">
+        <stop offset="0" stop-color="#E8D2FF" stop-opacity=".55"/>
+        <stop offset=".55" stop-color="#B026FF" stop-opacity=".22"/>
+        <stop offset="1" stop-color="#B026FF" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="c1glass" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".36"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity=".09"/>
+      </linearGradient>
+      <linearGradient id="c1wave" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#FF0044"/>
+        <stop offset=".26" stop-color="#FF9500"/>
+        <stop offset=".5" stop-color="#FFE800"/>
+        <stop offset=".76" stop-color="#00E5FF"/>
+        <stop offset="1" stop-color="#B026FF"/>
+      </linearGradient>
+      <linearGradient id="c1cap" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#D5DAE4"/>
+        <stop offset=".45" stop-color="#8E96A6"/>
+        <stop offset="1" stop-color="#5A6172"/>
+      </linearGradient>
+      <filter id="c1glow" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="30"/>
+      </filter>
+    </defs>
+    <g clip-path="url(#sqClip)">
+      <use href="#sq" fill="url(#c1bg)"/>
+      <circle cx="512" cy="430" r="350" fill="url(#c1halo)"/>
+      <!-- glass -->
+      <path d="M512 194A236 236 0 0 1 663.7 610.8C660 650 632 668 628 706L396 706C392 668 364 650 360.3 610.8A236 236 0 0 1 512 194Z"
+            fill="url(#c1glass)" stroke="#ffffff" stroke-opacity=".55" stroke-width="12"/>
+      <!-- filament waveform -->
+      <path d="M318 440L366 440L414 344L462 536L510 286L558 556L606 366L650 440L706 440"
+            fill="none" stroke="url(#c1wave)" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"
+            filter="url(#c1glow)" opacity=".95"/>
+      <path d="M318 440L366 440L414 344L462 536L510 286L558 556L606 366L650 440L706 440"
+            fill="none" stroke="url(#c1wave)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- specular -->
+      <path d="M414 306Q450 252 512 244" fill="none" stroke="#ffffff" stroke-opacity=".5" stroke-width="18" stroke-linecap="round"/>
+      <!-- screw cap -->
+      <rect x="398" y="694" width="228" height="58" rx="20" fill="url(#c1cap)"/>
+      <rect x="418" y="748" width="188" height="46" rx="18" fill="url(#c1cap)"/>
+      <rect x="444" y="790" width="136" height="36" rx="18" fill="url(#c1cap)"/>
+      <use href="#chrome"/>
+    </g>
+  </symbol>
+
+  <!-- ---------- CONCEPT 2: BEAT RING ---------- -->
+  <symbol id="tile2" viewBox="0 0 1024 1024">
+    <defs>
+      <radialGradient id="c2bg" cx=".5" cy=".48" r=".8">
+        <stop offset="0" stop-color="#12376F"/>
+        <stop offset=".5" stop-color="#07162F"/>
+        <stop offset="1" stop-color="#020610"/>
+      </radialGradient>
+      <linearGradient id="c2beat" x1="0" y1="0" x2="1" y2=".35">
+        <stop offset="0" stop-color="#FF0044"/>
+        <stop offset=".45" stop-color="#FF9500"/>
+        <stop offset="1" stop-color="#FFE800"/>
+      </linearGradient>
+      <radialGradient id="c2bulbGlow">
+        <stop offset="0" stop-color="#FFF6DC" stop-opacity=".95"/>
+        <stop offset=".4" stop-color="#FFD26B" stop-opacity=".45"/>
+        <stop offset="1" stop-color="#FF9500" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="c2glowBig" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="38"/></filter>
+      <filter id="c2glowSm" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="16"/></filter>
+    </defs>
+    <g clip-path="url(#sqClip)">
+      <use href="#sq" fill="url(#c2bg)"/>
+      <!-- outer ring: the beat travelling away -->
+      <circle cx="512" cy="512" r="436" fill="none" stroke="#8F3BFF" stroke-opacity=".38" stroke-width="20" filter="url(#c2glowSm)"/>
+      <circle cx="512" cy="512" r="436" fill="none" stroke="#A96BFF" stroke-opacity=".5" stroke-width="16"/>
+      <!-- THE beat ring -->
+      <circle cx="512" cy="512" r="318" fill="none" stroke="url(#c2beat)" stroke-width="72" opacity=".85" filter="url(#c2glowBig)"/>
+      <circle cx="512" cy="512" r="318" fill="none" stroke="url(#c2beat)" stroke-width="62"/>
+      <!-- inner ring -->
+      <circle cx="512" cy="512" r="206" fill="none" stroke="#00E5FF" stroke-opacity=".7" stroke-width="26" filter="url(#c2glowSm)"/>
+      <circle cx="512" cy="512" r="206" fill="none" stroke="#7BF0FF" stroke-opacity=".9" stroke-width="20"/>
+      <!-- the little bulb at the source -->
+      <circle cx="512" cy="500" r="185" fill="url(#c2bulbGlow)"/>
+      <path d="M512 397A92 92 0 0 1 571.1 559.5C569.6 570 563 575 562 585L462 585C461 575 454.4 570 452.9 559.5A92 92 0 0 1 512 397Z"
+            fill="#FFF9E9" stroke="#ffffff" stroke-opacity=".85" stroke-width="6"/>
+      <rect x="464" y="581" width="96" height="26" rx="10" fill="#C9CFDB"/>
+      <rect x="475" y="604" width="74" height="20" rx="9" fill="#9AA2B2"/>
+      <use href="#chrome"/>
+    </g>
+  </symbol>
+
+  <!-- ---------- CONCEPT 3: SPECTRUM BULB ---------- -->
+  <symbol id="tile3" viewBox="0 0 1024 1024">
+    <defs>
+      <linearGradient id="c3bg" x1="0" y1="0" x2=".25" y2="1">
+        <stop offset="0" stop-color="#4C4B5E"/>
+        <stop offset=".45" stop-color="#22212D"/>
+        <stop offset="1" stop-color="#101019"/>
+      </linearGradient>
+      <linearGradient id="c3b1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF5C86"/><stop offset="1" stop-color="#FF0044"/></linearGradient>
+      <linearGradient id="c3b2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFC163"/><stop offset="1" stop-color="#FF9500"/></linearGradient>
+      <linearGradient id="c3b3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF69B"/><stop offset="1" stop-color="#FFE800"/></linearGradient>
+      <linearGradient id="c3b4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8CF3FF"/><stop offset="1" stop-color="#00E5FF"/></linearGradient>
+      <linearGradient id="c3b5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D68BFF"/><stop offset="1" stop-color="#B026FF"/></linearGradient>
+      <linearGradient id="c3floor" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#FF0044"/><stop offset=".26" stop-color="#FF9500"/>
+        <stop offset=".5" stop-color="#FFE800"/><stop offset=".76" stop-color="#00E5FF"/>
+        <stop offset="1" stop-color="#B026FF"/>
+      </linearGradient>
+      <linearGradient id="c3cap" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#D5DAE4"/><stop offset=".45" stop-color="#8E96A6"/><stop offset="1" stop-color="#5A6172"/>
+      </linearGradient>
+      <clipPath id="c3glassClip">
+        <path d="M512 194A236 236 0 0 1 663.7 610.8C660 650 632 668 628 706L396 706C392 668 364 650 360.3 610.8A236 236 0 0 1 512 194Z"/>
+      </clipPath>
+      <filter id="c3glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="42"/></filter>
+      <g id="c3bars">
+        <rect x="345" y="430" width="54" height="158" rx="27" fill="url(#c3b1)"/>
+        <rect x="415" y="292" width="54" height="296" rx="27" fill="url(#c3b2)"/>
+        <rect x="485" y="206" width="54" height="382" rx="27" fill="url(#c3b3)"/>
+        <rect x="555" y="336" width="54" height="252" rx="27" fill="url(#c3b4)"/>
+        <rect x="625" y="396" width="54" height="192" rx="27" fill="url(#c3b5)"/>
+      </g>
+    </defs>
+    <g clip-path="url(#sqClip)">
+      <use href="#sq" fill="url(#c3bg)"/>
+      <!-- colored bloom escaping the glass -->
+      <use href="#c3bars" filter="url(#c3glow)" opacity=".6"/>
+      <!-- glass backing so the bulb silhouette always reads -->
+      <path d="M512 194A236 236 0 0 1 663.7 610.8C660 650 632 668 628 706L396 706C392 668 364 650 360.3 610.8A236 236 0 0 1 512 194Z"
+            fill="#0C0C14" fill-opacity=".9"/>
+      <g clip-path="url(#c3glassClip)">
+        <use href="#c3bars"/>
+        <rect x="330" y="598" width="364" height="12" rx="6" fill="url(#c3floor)" opacity=".92"/>
+        <ellipse cx="512" cy="660" rx="130" ry="58" fill="#ffffff" opacity=".07"/>
+      </g>
+      <!-- rim + specular -->
+      <path d="M512 194A236 236 0 0 1 663.7 610.8C660 650 632 668 628 706L396 706C392 668 364 650 360.3 610.8A236 236 0 0 1 512 194Z"
+            fill="none" stroke="#ffffff" stroke-opacity=".68" stroke-width="13"/>
+      <path d="M404 314Q442 258 508 250" fill="none" stroke="#ffffff" stroke-opacity=".42" stroke-width="16" stroke-linecap="round"/>
+      <!-- screw cap -->
+      <rect x="398" y="694" width="228" height="58" rx="20" fill="url(#c3cap)"/>
+      <rect x="418" y="748" width="188" height="46" rx="18" fill="url(#c3cap)"/>
+      <rect x="444" y="790" width="136" height="36" rx="18" fill="url(#c3cap)"/>
+      <use href="#chrome"/>
+    </g>
+  </symbol>
+
+  <!-- ---------- MENU BAR TEMPLATE GLYPHS (18 x 18, monochrome, currentColor) ---------- -->
+  <symbol id="mb1" viewBox="0 0 18 18">
+    <g fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M9 2.7A4.6 4.6 0 0 1 11.96 10.82C11.9 11.3 11.6 11.6 11.55 12.2L6.45 12.2C6.4 11.6 6.1 11.3 6.04 10.82A4.6 4.6 0 0 1 9 2.7Z"/>
+      <path d="M6.2 7.4L7.5 7.4L8.6 5.2L9.6 9.8L10.5 7.4L11.8 7.4"/>
+    </g>
+    <g fill="currentColor">
+      <rect x="6.5" y="12.9" width="5" height="1.5" rx=".6"/>
+      <rect x="7.3" y="14.9" width="3.4" height="1.3" rx=".55"/>
+    </g>
+  </symbol>
+  <symbol id="mb2" viewBox="0 0 18 18">
+    <g fill="none" stroke="currentColor" stroke-linecap="round">
+      <circle cx="9" cy="9" r="4.3" stroke-width="1.6"/>
+      <path d="M14.02 3.98A7.1 7.1 0 0 1 14.02 14.02" stroke-width="1.15"/>
+      <path d="M3.98 14.02A7.1 7.1 0 0 1 3.98 3.98" stroke-width="1.15"/>
+    </g>
+    <circle cx="9" cy="9" r="1.75" fill="currentColor"/>
+  </symbol>
+  <symbol id="mb3" viewBox="0 0 18 18">
+    <g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M9 2.7A4.6 4.6 0 0 1 11.96 10.82C11.9 11.3 11.6 11.6 11.55 12.2L6.45 12.2C6.4 11.6 6.1 11.3 6.04 10.82A4.6 4.6 0 0 1 9 2.7Z" stroke-width="1.2"/>
+      <path d="M7.1 10.1L7.1 7.5" stroke-width="1.1"/>
+      <path d="M9 10.1L9 5.3" stroke-width="1.1"/>
+      <path d="M10.9 10.1L10.9 6.9" stroke-width="1.1"/>
+    </g>
+    <g fill="currentColor">
+      <rect x="6.5" y="12.9" width="5" height="1.5" rx=".6"/>
+      <rect x="7.3" y="14.9" width="3.4" height="1.3" rx=".55"/>
+    </g>
+  </symbol>
+</svg>
+
+<div class="wrap">
+
+<header>
+  <h1>Glowbeat app icon concepts</h1>
+  <p>Three directions for the macOS app icon, drawn on the Sonoma and Tahoe icon squircle (superellipse, roughly 22.4% continuous corner radius) with a top-lit sheen, a bottom-weighted inner shadow, and a hairline top edge. Every icon is shown at 512, 128, and 32 px on a light and a dark dock, plus its 18 px menu bar template.</p>
+  <p>Colors are pulled from the app's own palettes in <code>Packages/Effects/Sources/Effects/Palette.swift</code>.</p>
+  <div class="chips">
+    <span class="chip"><i style="background:linear-gradient(90deg,#FF0044,#FF9500,#FFE800,#00E5FF,#B026FF)"></i>Party</span>
+    <span class="chip"><i style="background:linear-gradient(90deg,#FF4E00,#FF8C42,#FFC15E,#C2185B,#6A1B9A)"></i>Sunset</span>
+    <span class="chip"><i style="background:linear-gradient(90deg,#00B4D8,#0077B6,#48CAE4,#90E0EF,#023E8A)"></i>Ocean</span>
+    <span class="chip"><i style="background:linear-gradient(90deg,#39FF14,#FF073A,#00F0FF,#FF00E6,#FAFF00)"></i>Neon</span>
+    <span class="chip"><i style="background:linear-gradient(90deg,#5A00FF,#6A00FF,#8F00FF,#B400FF,#3A00C8)"></i>Blacklight</span>
+  </div>
+</header>
+
+<hr class="rule">
+
+<!-- ========== CONCEPT 1 ========== -->
+<section class="card">
+  <h2><span class="num">01</span>Bulb + waveform</h2>
+  <p class="rationale">The product in one shape: a bulb whose filament is the music, so the icon says "your light is the song" before anyone reads a word. Blacklight violet ground makes the Party rainbow filament glow like a real emitter.</p>
+
+  <div class="panel light">
+    <p class="plabel">Light dock</p>
+    <div class="shelf">
+      <div class="ic"><svg class="s512" width="512" height="512" viewBox="0 0 1024 1024"><use href="#tile1" width="1024" height="1024"/></svg><span class="cap">512 px</span></div>
+      <div class="ic"><svg class="s128" width="128" height="128" viewBox="0 0 1024 1024"><use href="#tile1" width="1024" height="1024"/></svg><span class="cap">128 px</span></div>
+      <div class="ic"><svg class="s32" width="32" height="32" viewBox="0 0 1024 1024"><use href="#tile1" width="1024" height="1024"/></svg><span class="cap">32 px</span></div>
+    </div>
+  </div>
+
+  <div class="panel dark">
+    <p class="plabel">Dark dock</p>
+    <div class="shelf">
+      <div class="ic"><svg class="s512" width="512" height="512" viewBox="0 0 1024 1024"><use href="#tile1" width="1024" height="1024"/></svg><span class="cap">512 px</span></div>
+      <div class="ic"><svg class="s128" width="128" height="128" viewBox="0 0 1024 1024"><use href="#tile1" width="1024" height="1024"/></svg><span class="cap">128 px</span></div>
+      <div class="ic"><svg class="s32" width="32" height="32" viewBox="0 0 1024 1024"><use href="#tile1" width="1024" height="1024"/></svg><span class="cap">32 px</span></div>
+    </div>
+  </div>
+
+  <div class="mbwrap">
+    <div class="mb light">
+      <div class="mbbar"><span style="font-weight:600">Glowbeat</span><span>File</span><span>Bulbs</span><span class="spacer"></span>
+        <svg width="18" height="18" viewBox="0 0 18 18" style="color:rgba(0,0,0,.85)"><use href="#mb1"/></svg></div>
+      <div class="mbzoom"><svg width="54" height="54" viewBox="0 0 18 18" style="color:rgba(0,0,0,.85)"><use href="#mb1"/></svg><span>Template, 18 px<br>shown at 3x</span></div>
+    </div>
+    <div class="mb dark">
+      <div class="mbbar"><span style="font-weight:600">Glowbeat</span><span>File</span><span>Bulbs</span><span class="spacer"></span>
+        <svg width="18" height="18" viewBox="0 0 18 18" style="color:rgba(255,255,255,.92)"><use href="#mb1"/></svg></div>
+      <div class="mbzoom"><svg width="54" height="54" viewBox="0 0 18 18" style="color:rgba(255,255,255,.92)"><use href="#mb1"/></svg><span>Same artwork,<br>tinted by macOS</span></div>
+    </div>
+  </div>
+
+  <div class="note"><span class="k">32 px</span><p><b>Reads well.</b> The white glass rim holds the bulb silhouette and the filament survives as one bright colored streak. The individual wave peaks fuse, so at 32 px it says "light plus sound" without saying which waveform. Strongest bulb recognition of the three.</p></div>
+</section>
+
+<!-- ========== CONCEPT 2 ========== -->
+<section class="card">
+  <h2><span class="num">02</span>Beat ring</h2>
+  <p class="rationale">Sells the verb instead of the object: rings pushing out from a small warm bulb, with the middle ring blown out on the downbeat, so the icon animates in your head. Ocean navy ground keeps the hot Sunset ring loud.</p>
+
+  <div class="panel light">
+    <p class="plabel">Light dock</p>
+    <div class="shelf">
+      <div class="ic"><svg class="s512" width="512" height="512" viewBox="0 0 1024 1024"><use href="#tile2" width="1024" height="1024"/></svg><span class="cap">512 px</span></div>
+      <div class="ic"><svg class="s128" width="128" height="128" viewBox="0 0 1024 1024"><use href="#tile2" width="1024" height="1024"/></svg><span class="cap">128 px</span></div>
+      <div class="ic"><svg class="s32" width="32" height="32" viewBox="0 0 1024 1024"><use href="#tile2" width="1024" height="1024"/></svg><span class="cap">32 px</span></div>
+    </div>
+  </div>
+
+  <div class="panel dark">
+    <p class="plabel">Dark dock</p>
+    <div class="shelf">
+      <div class="ic"><svg class="s512" width="512" height="512" viewBox="0 0 1024 1024"><use href="#tile2" width="1024" height="1024"/></svg><span class="cap">512 px</span></div>
+      <div class="ic"><svg class="s128" width="128" height="128" viewBox="0 0 1024 1024"><use href="#tile2" width="1024" height="1024"/></svg><span class="cap">128 px</span></div>
+      <div class="ic"><svg class="s32" width="32" height="32" viewBox="0 0 1024 1024"><use href="#tile2" width="1024" height="1024"/></svg><span class="cap">32 px</span></div>
+    </div>
+  </div>
+
+  <div class="mbwrap">
+    <div class="mb light">
+      <div class="mbbar"><span style="font-weight:600">Glowbeat</span><span>File</span><span>Bulbs</span><span class="spacer"></span>
+        <svg width="18" height="18" viewBox="0 0 18 18" style="color:rgba(0,0,0,.85)"><use href="#mb2"/></svg></div>
+      <div class="mbzoom"><svg width="54" height="54" viewBox="0 0 18 18" style="color:rgba(0,0,0,.85)"><use href="#mb2"/></svg><span>Template, 18 px<br>shown at 3x</span></div>
+    </div>
+    <div class="mb dark">
+      <div class="mbbar"><span style="font-weight:600">Glowbeat</span><span>File</span><span>Bulbs</span><span class="spacer"></span>
+        <svg width="18" height="18" viewBox="0 0 18 18" style="color:rgba(255,255,255,.92)"><use href="#mb2"/></svg></div>
+      <div class="mbzoom"><svg width="54" height="54" viewBox="0 0 18 18" style="color:rgba(255,255,255,.92)"><use href="#mb2"/></svg><span>Same artwork,<br>tinted by macOS</span></div>
+    </div>
+  </div>
+
+  <div class="note"><span class="k">32 px</span><p><b>Best silhouette, weakest story.</b> It collapses into a clean bullseye with one hot ring, which is the most distinctive shape of the three in a crowded dock. The center bulb reduces to a dot, so at 32 px it reads as "pulse" and leans on the app name to say lighting.</p></div>
+</section>
+
+<!-- ========== CONCEPT 3 ========== -->
+<section class="card">
+  <h2><span class="num">03</span>Spectrum bulb</h2>
+  <p class="rationale">An equalizer poured into a bulb: maximum color, instantly obvious this app is about music, and the graphite ground lets all five Party colors stay saturated without fighting each other.</p>
+
+  <div class="panel light">
+    <p class="plabel">Light dock</p>
+    <div class="shelf">
+      <div class="ic"><svg class="s512" width="512" height="512" viewBox="0 0 1024 1024"><use href="#tile3" width="1024" height="1024"/></svg><span class="cap">512 px</span></div>
+      <div class="ic"><svg class="s128" width="128" height="128" viewBox="0 0 1024 1024"><use href="#tile3" width="1024" height="1024"/></svg><span class="cap">128 px</span></div>
+      <div class="ic"><svg class="s32" width="32" height="32" viewBox="0 0 1024 1024"><use href="#tile3" width="1024" height="1024"/></svg><span class="cap">32 px</span></div>
+    </div>
+  </div>
+
+  <div class="panel dark">
+    <p class="plabel">Dark dock</p>
+    <div class="shelf">
+      <div class="ic"><svg class="s512" width="512" height="512" viewBox="0 0 1024 1024"><use href="#tile3" width="1024" height="1024"/></svg><span class="cap">512 px</span></div>
+      <div class="ic"><svg class="s128" width="128" height="128" viewBox="0 0 1024 1024"><use href="#tile3" width="1024" height="1024"/></svg><span class="cap">128 px</span></div>
+      <div class="ic"><svg class="s32" width="32" height="32" viewBox="0 0 1024 1024"><use href="#tile3" width="1024" height="1024"/></svg><span class="cap">32 px</span></div>
+    </div>
+  </div>
+
+  <div class="mbwrap">
+    <div class="mb light">
+      <div class="mbbar"><span style="font-weight:600">Glowbeat</span><span>File</span><span>Bulbs</span><span class="spacer"></span>
+        <svg width="18" height="18" viewBox="0 0 18 18" style="color:rgba(0,0,0,.85)"><use href="#mb3"/></svg></div>
+      <div class="mbzoom"><svg width="54" height="54" viewBox="0 0 18 18" style="color:rgba(0,0,0,.85)"><use href="#mb3"/></svg><span>Template, 18 px<br>shown at 3x</span></div>
+    </div>
+    <div class="mb dark">
+      <div class="mbbar"><span style="font-weight:600">Glowbeat</span><span>File</span><span>Bulbs</span><span class="spacer"></span>
+        <svg width="18" height="18" viewBox="0 0 18 18" style="color:rgba(255,255,255,.92)"><use href="#mb3"/></svg></div>
+      <div class="mbzoom"><svg width="54" height="54" viewBox="0 0 18 18" style="color:rgba(255,255,255,.92)"><use href="#mb3"/></svg><span>Same artwork,<br>tinted by macOS</span></div>
+    </div>
+  </div>
+
+  <div class="note"><span class="k">32 px</span><p><b>Most colorful, least legible detail.</b> The five bars blur into one rainbow gradient inside the bulb, so it stays lively and unmistakably a bulb but reads as "rainbow bulb" rather than "equalizer." The menu bar version is the tightest of the three: three bars inside a bulb outline at 18 px is close to the limit, so it may need to drop to two bars.</p></div>
+</section>
+
+<hr class="rule">
+
+<!-- ========== EXPORT ========== -->
+<section>
+  <h2 class="sec">Export masters, 1024 px</h2>
+  <p class="seclead">Each master is <code>viewBox="0 0 1024 1024"</code> with the artwork inset to the 824 x 824 macOS icon shape and 100 px of transparent padding on every side, which is the geometry an asset catalog expects for the 512pt @2x slot. Use the copy button to grab a standalone SVG (defs included) that you can save as a <code>.svg</code> and rasterize into <code>Assets.xcassets</code>.</p>
+  <div class="exports">
+    <div class="ex">
+      <div class="frame"><svg id="ex1" width="100%" viewBox="0 0 1024 1024"><g transform="translate(100 100) scale(0.8046875)"><use href="#tile1" width="1024" height="1024"/></g></svg></div>
+      <h3>01 Bulb + waveform</h3><small>1024 x 1024, 824 shape</small>
+      <button class="copy" data-sym="tile1">Copy standalone SVG</button>
+    </div>
+    <div class="ex">
+      <div class="frame"><svg id="ex2" width="100%" viewBox="0 0 1024 1024"><g transform="translate(100 100) scale(0.8046875)"><use href="#tile2" width="1024" height="1024"/></g></svg></div>
+      <h3>02 Beat ring</h3><small>1024 x 1024, 824 shape</small>
+      <button class="copy" data-sym="tile2">Copy standalone SVG</button>
+    </div>
+    <div class="ex">
+      <div class="frame"><svg id="ex3" width="100%" viewBox="0 0 1024 1024"><g transform="translate(100 100) scale(0.8046875)"><use href="#tile3" width="1024" height="1024"/></g></svg></div>
+      <h3>03 Spectrum bulb</h3><small>1024 x 1024, 824 shape</small>
+      <button class="copy" data-sym="tile3">Copy standalone SVG</button>
+    </div>
+  </div>
+  <div class="note" style="margin-top:22px"><span class="k">Note</span><p>The copied SVG is full bleed, meaning the squircle fills the whole 1024 box. That is the version to hand to an icon composer that adds its own padding and shadow. If you want the padded asset catalog version instead, wrap the copied contents in <code>&lt;g transform="translate(100 100) scale(0.8046875)"&gt;</code>, exactly as the previews above do.</p></div>
+</section>
+
+</div>
+
+<script>
+document.querySelectorAll('button.copy').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var sym = document.getElementById(btn.dataset.sym);
+    var shared = document.getElementById('gb-shared');
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ' +
+              'viewBox="0 0 1024 1024" width="1024" height="1024">\n' +
+              '<defs>' + shared.innerHTML + '</defs>\n' + sym.innerHTML + '\n</svg>';
+    navigator.clipboard.writeText(svg).then(function () {
+      var old = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(function () { btn.textContent = old; }, 1400);
+    }, function () {
+      btn.textContent = 'Copy failed, use view source';
+    });
+  });
+});
+</script>
+
+</body>
+</html>
