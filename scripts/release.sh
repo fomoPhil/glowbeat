@@ -175,14 +175,19 @@ cp "$APPCAST_DIR/appcast.xml" "$DIST/appcast.xml"
 step "Done"
 ls -lh "$DMG" "$DIST/appcast.xml"
 
+# The website's Download button points at releases/latest/download/Glowbeat.dmg, so every
+# release also carries a copy under that fixed name.
+STABLE_DMG="$DIST/Glowbeat.dmg"
+cp "$DMG" "$STABLE_DMG"
+
 if [[ "$PUBLISH" == "--publish" ]]; then
     step "Publish v$VERSION on $REPO"
     NOTES=(--generate-notes)
     [[ -f "docs/release-notes/$VERSION.md" ]] && NOTES=(--notes-file "docs/release-notes/$VERSION.md")
-    gh release create "v$VERSION" "$DMG" "$DIST/appcast.xml" \
-        --repo "$REPO" --title "Glowbeat $VERSION" "${NOTES[@]}"
+    gh release create "v$VERSION" "$DMG" "$STABLE_DMG" "$DIST/appcast.xml" \
+        --latest --repo "$REPO" --title "Glowbeat $VERSION" "${NOTES[@]}"
 else
     echo
     echo "Not published. When ready:"
-    echo "  gh release create v$VERSION \"$DMG\" \"$DIST/appcast.xml\" --repo $REPO --title \"Glowbeat $VERSION\" --notes \"...\""
+    echo "  gh release create v$VERSION \"$DMG\" \"$STABLE_DMG\" \"$DIST/appcast.xml\" --latest --repo $REPO --title \"Glowbeat $VERSION\" --notes \"...\""
 fi

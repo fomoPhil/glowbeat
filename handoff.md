@@ -2,11 +2,20 @@
 
 Last updated 2026-09-23 (session 01B3VyjvQPtLjJ8x4PSU7gWZ). Read this first in any new session.
 
+## Repos (2026-09-24, read first)
+- PUBLIC: https://github.com/fomoPhil/glowbeat, branch `main`. Starts at one clean commit
+  "Glowbeat 1.0.0" (d4ca8d7). All new work goes on `main` here. Release v1.0.0 is published
+  with Glowbeat-1.0.0.dmg, Glowbeat.dmg (stable name the website links to) and appcast.xml.
+- PRIVATE ARCHIVE: https://github.com/fomoPhil/glowbeat-archive holds the full pre-1.0 history
+  (branches build-v1, master), including research material that must never be made public
+  (decompiled Govee code). Local remote name: `archive`. Full backup bundle:
+  ~/Projects/glowbeat-full-history-2026-09-24.bundle.
+- The .superpowers ledger and reports stay local (gitignored).
+
 ## What Glowbeat is
 Native macOS app (SwiftUI, Swift 6) that controls Phil's six Govee H6004 Wi-Fi bulbs over the LAN and runs an audio-reactive Party Mode from a CoreAudio system-audio tap, plus five non-music scenes. Name stays Glowbeat (name check: docs/research/name-check-glowbeat.md). Icon chosen: spectrum-bars bulb (docs/design/AppIcon-1024.png, wired into App/Assets.xcassets).
 
 ## Where things are
-- GitHub: https://github.com/fomoPhil/glowbeat (PRIVATE, default branch build-v1, pushed 2026-09-23). README.md at the root is the user facing guide (images in docs/readme/).
 - Repo: ~/Projects/glowbeat, branch `build-v1` (55+ commits ahead of `master`, which only holds the initial docs). NOT merged yet.
 - Specs: docs/superpowers/specs/ (v1 design, v1.1 addendum, v1.2 addendum A to Q). Plan: docs/superpowers/plans/2026-09-11-glowbeat.md.
 - Decision ledger (every ruling, parked item, deferred minor): .superpowers/sdd/2026-09-11-glowbeat/progress.md (gitignored, on disk only). Reports for each task live next to it.

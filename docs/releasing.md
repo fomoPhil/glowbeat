@@ -30,7 +30,7 @@ Commit the `project.yml` version bump the script makes.
    app inside the mounted image.
 7. Builds `appcast.xml` with Sparkle's `generate_appcast`, starting from the appcast on
    the latest published release so older versions stay in the feed.
-8. With `--publish`: `gh release create v<version>` on `fomoPhil/glowbeat` with the dmg
+8. With `--publish`: `gh release create v<version>` on `fomoPhil/glowbeat` with the dmg, a copy named `Glowbeat.dmg` (the website's Download button links to `releases/latest/download/Glowbeat.dmg`),
    and `appcast.xml` attached. Notes come from `docs/release-notes/<version>.md` if it
    exists, otherwise GitHub generates them.
 
