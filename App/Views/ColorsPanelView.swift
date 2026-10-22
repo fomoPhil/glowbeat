@@ -27,6 +27,11 @@ struct ColorsPanelView: View {
                  alignment: .top)
     ]
 
+    /// Between one group and the next. Tighter than `PartyStyle.sectionSpacing`, which
+    /// still separates the caption, the slider and the grid, and still wider than the
+    /// 11 between a group's title and its swatches, so each title stays with its group.
+    static let groupSpacing: CGFloat = 16
+
     var body: some View {
         VStack(alignment: .leading, spacing: PartyStyle.sectionSpacing) {
             Text(Self.caption)
@@ -38,11 +43,13 @@ struct ColorsPanelView: View {
 
             Divider()
 
-            ForEach(StillColorGroup.allCases) { group in
-                StillColorGroupSection(group: group,
-                                       columns: Self.columns,
-                                       selection: model.settings.stillColorID,
-                                       onSelect: { model.applyStillColor($0) })
+            VStack(alignment: .leading, spacing: Self.groupSpacing) {
+                ForEach(StillColorGroup.allCases) { group in
+                    StillColorGroupSection(group: group,
+                                           columns: Self.columns,
+                                           selection: model.settings.stillColorID,
+                                           onSelect: { model.applyStillColor($0) })
+                }
             }
         }
         .padding(PartyStyle.sheetPadding)

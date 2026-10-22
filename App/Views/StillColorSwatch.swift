@@ -19,9 +19,10 @@ struct StillColorSwatch: View {
 
     /// Big enough to judge a color by and small enough that six fit across the pane.
     /// Wider than it is tall, so a row of them reads as a row of lights rather than as a
-    /// grid of tiles.
+    /// grid of tiles. 48 tall rather than 56 (Phil, 2026-10-22) so the pane scrolls by
+    /// less than a row at the window Glowbeat opens at.
     static let swatchWidth: CGFloat = 96
-    static let swatchHeight: CGFloat = 56
+    static let swatchHeight: CGFloat = 48
     /// The gap between the swatch and the ring that picks it out.
     ///
     /// Wider than `PartyStyle.chipPadding`, which is what a palette chip uses, and for a
