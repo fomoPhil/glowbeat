@@ -108,6 +108,21 @@ final class StillColorWiringTests: XCTestCase {
                                   .brightness(70)])
     }
 
+    /// The menu bar popover passes its own slider, so the color lands where that slider
+    /// sits and becomes the still brightness (Phil, 2026-10-22).
+    func testApplyingAtABrightnessSendsThatBrightnessAndKeepsIt() async throws {
+        let model = try await makeRoom()
+        defer { model.stopServices() }
+
+        model.applyStillColor(.goldenHour, brightness: 0.4)
+
+        let commands = await waitForCommands(count: 3)
+        XCTAssertEqual(commands, [.turn(true),
+                                  .color(GoveeRGB(r: 0xFF, g: 0xA1, b: 0x14)),
+                                  .brightness(40)])
+        XCTAssertEqual(model.settings.stillBrightness, 0.4, accuracy: 0.0001)
+    }
+
     /// Every reachable bulb, not only the first: this is a room control.
     func testEveryBulbGetsTheColor() async throws {
         let model = try await makeRoom()

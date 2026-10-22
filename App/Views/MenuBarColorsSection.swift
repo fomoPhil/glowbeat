@@ -16,6 +16,9 @@ import SwiftUI
 struct MenuBarColorsSection: View {
 
     let model: AppModel
+    /// The popover slider's position, 0 to 1. A picked color lands at it, so the slider
+    /// never jumps on a click.
+    var brightness: Double? = nil
 
     // MARK: Metrics
     //
@@ -107,7 +110,7 @@ struct MenuBarColorsSection: View {
                         ForEach(StillColor.colors(in: group)) { color in
                             MenuBarColorSwatch(color: color,
                                                isSelected: color.id == model.settings.stillColorID,
-                                               onSelect: { model.applyStillColor(color) })
+                                               onSelect: { model.applyStillColor(color, brightness: brightness) })
                         }
                     }
                     .accessibilityElement(children: .contain)

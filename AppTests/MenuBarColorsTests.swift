@@ -344,6 +344,20 @@ final class MenuBarColorsTests: XCTestCase {
                        "With nothing applied the slider keeps whatever it was showing.")
     }
 
+    /// Phil, 2026-10-22: the slider reads 40, a swatch is clicked, and the color lands at
+    /// 40 with the slider still on 40, not jumping to the Colors pane's 70.
+    func testAPickLandsAtTheSlidersBrightnessAndTheSliderStays() throws {
+        let model = try makeModel()
+        model.setStillBrightness(0.7)
+
+        model.applyStillColor(.rose, brightness: 40 / 100)
+
+        XCTAssertEqual(MenuBarContentView.syncedPercent(appliedStillColor: model.appliedStillColor,
+                                                        stillBrightness: model.settings.stillBrightness,
+                                                        current: 40),
+                       40)
+    }
+
     // MARK: No tick marks
 
     /// The popover is one of the two places `SliderTickTests` already walks, and it now

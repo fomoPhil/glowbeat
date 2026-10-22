@@ -109,7 +109,7 @@ struct MenuBarContentView: View {
 
             Divider()
 
-            MenuBarColorsSection(model: model)
+            MenuBarColorsSection(model: model, brightness: brightness / 100)
 
             Divider()
 

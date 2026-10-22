@@ -90,8 +90,8 @@ struct MainWindowView: View {
             // activation dance.
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button("Rescan", systemImage: "arrow.clockwise") { model.rescan() }
-                        .help("Look for bulbs again")
+                    Button("Reconnect", systemImage: "arrow.clockwise") { model.restartNetwork() }
+                        .help("Reconnect to the bulbs")
                 }
                 ToolbarItem(placement: .primaryAction) {
                     SettingsLink {
@@ -392,6 +392,7 @@ struct BannerView: View {
     private var symbol: String {
         switch banner {
         case .noBulbs: return "lightbulb.slash"
+        case .bulbsUnreachable: return "wifi.exclamationmark"
         case .networkUnavailable: return "wifi.slash"
         case .audioDenied: return "speaker.slash"
         case .partyPaused: return "pause.circle"
@@ -400,7 +401,7 @@ struct BannerView: View {
 
     private var tint: Color {
         switch banner {
-        case .noBulbs: return .secondary
+        case .noBulbs, .bulbsUnreachable: return .secondary
         case .networkUnavailable: return .red
         case .audioDenied: return .red
         case .partyPaused: return .orange
@@ -410,6 +411,7 @@ struct BannerView: View {
     private var title: String {
         switch banner {
         case .noBulbs: return "No bulbs found"
+        case .bulbsUnreachable: return "Can't reach the bulbs"
         case .networkUnavailable: return "Network unavailable"
         case .audioDenied: return "Glowbeat is not hearing any audio"
         case .partyPaused(let reason): return reason
@@ -420,6 +422,8 @@ struct BannerView: View {
         switch banner {
         case .noBulbs:
             return "Turn on LAN Control for each bulb in Govee Home, then scan again."
+        case .bulbsUnreachable:
+            return "If they have power, reconnect."
         case .networkUnavailable:
             return "Glowbeat could not open its network connection. Check that Wi-Fi is on and that this Mac is on the same network as the bulbs."
         case .audioDenied:
@@ -433,7 +437,10 @@ struct BannerView: View {
     private var action: some View {
         switch banner {
         case .noBulbs:
-            Button("Scan again") { model.rescan() }
+            Button("Scan again") { model.restartNetwork() }
+        case .bulbsUnreachable:
+            Button("Reconnect") { model.restartNetwork() }
+                .buttonStyle(.borderedProminent)
         case .networkUnavailable:
             Button("Try again") { model.restartNetwork() }
                 .buttonStyle(.borderedProminent)
