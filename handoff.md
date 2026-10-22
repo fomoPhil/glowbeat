@@ -1,6 +1,6 @@
 # Glowbeat handoff
 
-Last updated 2026-09-23 (session 01B3VyjvQPtLjJ8x4PSU7gWZ). Read this first in any new session.
+Last updated 2026-10-22. Read this first in any new session.
 
 ## Repos (2026-09-24, read first)
 - PUBLIC: https://github.com/fomoPhil/glowbeat, branch `main`. Starts at one clean commit
@@ -11,6 +11,32 @@ Last updated 2026-09-23 (session 01B3VyjvQPtLjJ8x4PSU7gWZ). Read this first in a
   (decompiled Govee code). Local remote name: `archive`. Full backup bundle:
   ~/Projects/glowbeat-full-history-2026-09-24.bundle.
 - The .superpowers ledger and reports stay local (gitignored).
+
+## Latest: 1.0.1 (2026-10-22, branch fix/1.0.1)
+- **Lights going dead after a while.** Phil: "when I step away for a while and go back to it, the
+  lights are no longer responsive, even on a rescan." Only quit + reopen fixed it. The Mac never
+  slept (pmset shows no sleep for two days), so the wake rebuild never ran, and nothing rebuilt the
+  socket. Logs on 2026-10-22: the copy running since 22:05 heard no bulb at 07:00, then started
+  hearing them 0.25 s after a second copy launched and joined the multicast group at 08:12. Best
+  guess is the Mac's multicast membership lapsing at the router; not proven (a probe can't tell
+  while Phil's copy holds 4002). Fix that doesn't depend on the cause: the toolbar button
+  (now "Reconnect"), "Scan again" and the new banner's Reconnect call `restartNetwork()`, a full
+  socket rebuild, same as a relaunch. While bulbs are known and none answer, the socket rebuilds
+  itself at most every 5 min (`silentRoomReconnectInterval`). New banner `.bulbsUnreachable`:
+  "Can't reach the bulbs / If they have power, reconnect." `rescan()` is still a plain scan
+  (tests poll it).
+- **One copy at a time from any path.** Two copies (/Applications + a DerivedData debug build)
+  both held UDP 4002 on 2026-10-22. `LSMultipleInstancesProhibited` doesn't cover different
+  paths. `GlowbeatApp.init` now quits a newer copy and activates the older one
+  (`copyToGiveWayTo`). Side effect for agents: a debug build won't run while Phil's copy is
+  open. Quit his copy first (tell him) for any hardware test.
+- **Popover swatch** lands at the popover slider's brightness; the slider no longer jumps
+  (Phil's ruling). `applyStillColor(_:brightness:)`.
+- **Colors pane** swatches 56 to 48 tall, 16 pt between groups: overflow 79 pt at 1000 x 850
+  (under one row). Window height stays 1000 x 850 (decided).
+- Pre-existing failure, also on main: `PartyLightModeIsolationTests.testAutoLightModeSendsNothingWhilePartyModeRunsEvenWhenNightShiftFlips`
+  (no Kelvin after the stop; the settle color goes out instead). Not caused by 1.0.1.
+- All per-task `build/DerivedData-*` folders deleted (16 GB). Delete new ones when a task ends.
 
 ## What Glowbeat is
 Native macOS app (SwiftUI, Swift 6) that controls Phil's six Govee H6004 Wi-Fi bulbs over the LAN and runs an audio-reactive Party Mode from a CoreAudio system-audio tap, plus five non-music scenes. Name stays Glowbeat (name check: docs/research/name-check-glowbeat.md). Icon chosen: spectrum-bars bulb (docs/design/AppIcon-1024.png, wired into App/Assets.xcassets).
@@ -430,15 +456,8 @@ bulbs were never touched, Party Mode never ran against them, and Phil's running 
 was not touched.
 
 ## Open items
-0aaaa. **Ruling wanted: the popover's brightness slider jumping to 70% when a swatch is
-   clicked.** Keep it (the number is what the color was sent at) or make the slider's
-   current position the brightness the color lands at. See `menubar-colors-report.md`.
-0aaa. **Ruling wanted: the Colors pane's 167 points of scroll.** Keep the 96 x 56 swatch
-   and four labeled groups as the brief specifies, or drop to 96 x 48 with tighter group
-   spacing and buy back about 90 of it. See `colors-report.md`.
-0aa. **Decide the window height**: 1000 x 850 as it ships now (820 until Confetti added a
-   row under the palette on 2026-09-23), or back to 760 with a scroller under the Party
-   pane. See `sidebar-report.md` and `feel-confetti-report.md`.
+0a. Phil confirms the lights stay reachable after stepping away on 1.0.1, or that Reconnect
+   brings them back. If they still die, probe the cause with his copy quit (see Latest).
 0ab. Phil's eyes on the sidebar, the strip and the Schedule pane (checklist Steps 0b and
    9). Decide whether the Scenes pane and the bulb list get the 05 treatment too, and send
    the menu bar popover screenshot for its own pass.
