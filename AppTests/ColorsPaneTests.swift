@@ -222,8 +222,9 @@ final class ColorsPaneTests: XCTestCase {
     /// is above the grid rather than under it: the one control you reach for after a
     /// click must not be behind the catalog. What this holds is the size of the overflow,
     /// so a catalog that doubled, or a swatch that grew, would fail here rather than
-    /// quietly turning the pane into a long scroll.
-    func testThePaneOverflowsTheWindowByAtMostTwoRows() throws {
+    /// quietly turning the pane into a long scroll. Less than one row since 2026-10-22,
+    /// when the swatches went from 56 to 48 tall.
+    func testThePaneOverflowsTheWindowByLessThanOneRow() throws {
         let model = try makeModel()
         let width = MainWindowMetrics.designWidth - MainWindowMetrics.sidebarIdealWidth
         let renderer = ImageRenderer(content: ColorsPanelView(model: model).frame(width: width))
@@ -235,9 +236,10 @@ final class ColorsPaneTests: XCTestCase {
 
         // One row is a swatch, its name and the gaps either side of it.
         let row = StillColorSwatch.swatchHeight + StillColorSwatch.chipPadding * 2 + 22
-        XCTAssertLessThanOrEqual(CGFloat(height), available + row * 2,
-                                 "The pane is \(height) points against \(available) of "
-                                 + "room, which is more than two rows of scrolling.")
+        print("[colors] pane \(height) against \(available), overflow \(CGFloat(height) - available), row \(row)")
+        XCTAssertLessThan(CGFloat(height), available + row,
+                          "The pane is \(height) points against \(available) of "
+                          + "room, which is a row or more of scrolling.")
     }
 
     // MARK: Snapshots

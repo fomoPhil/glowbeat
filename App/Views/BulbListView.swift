@@ -194,11 +194,7 @@ struct NoBulbsView: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: 340)
             Button(model.networkUnavailable ? "Try again" : "Scan again") {
-                if model.networkUnavailable {
-                    model.restartNetwork()
-                } else {
-                    model.rescan()
-                }
+                model.restartNetwork()
             }
             .buttonStyle(.borderedProminent)
         }

@@ -29,6 +29,41 @@ final class TestHostTests: XCTestCase {
         ]))
     }
 
+    // MARK: One copy at a time, whatever path it runs from
+
+    /// The release in /Applications and a build anywhere else are the same bundle at two
+    /// paths, and both launch. The newer one gives way to the older one.
+    func testANewerCopyGivesWayToTheOlderOne() {
+        let older = GlowbeatApp.RunningCopy(pid: 900, launchDate: Date(timeIntervalSince1970: 100))
+        let newer = GlowbeatApp.RunningCopy(pid: 500, launchDate: Date(timeIntervalSince1970: 200))
+        XCTAssertEqual(GlowbeatApp.copyToGiveWayTo(own: newer, others: [older, newer]), older)
+        XCTAssertNil(GlowbeatApp.copyToGiveWayTo(own: older, others: [older, newer]),
+                     "The older copy quit too, so nothing is left running.")
+    }
+
+    /// Two copies launched in the same instant must agree, or both quit.
+    func testTwoCopiesLaunchedTogetherKeepExactlyOne() {
+        let date = Date(timeIntervalSince1970: 100)
+        let first = GlowbeatApp.RunningCopy(pid: 10, launchDate: date)
+        let second = GlowbeatApp.RunningCopy(pid: 11, launchDate: date)
+        XCTAssertNil(GlowbeatApp.copyToGiveWayTo(own: first, others: [first, second]))
+        XCTAssertEqual(GlowbeatApp.copyToGiveWayTo(own: second, others: [first, second]), first)
+    }
+
+    /// A copy run straight from its binary has no launch date, and counts as the newest.
+    func testACopyWithNoLaunchDateGivesWay() {
+        let dated = GlowbeatApp.RunningCopy(pid: 900, launchDate: Date(timeIntervalSince1970: 100))
+        let undated = GlowbeatApp.RunningCopy(pid: 10, launchDate: nil)
+        XCTAssertEqual(GlowbeatApp.copyToGiveWayTo(own: undated, others: [dated, undated]), dated)
+        XCTAssertNil(GlowbeatApp.copyToGiveWayTo(own: dated, others: [dated, undated]))
+    }
+
+    func testAloneThereIsNothingToGiveWayTo() {
+        let only = GlowbeatApp.RunningCopy(pid: 10, launchDate: Date())
+        XCTAssertNil(GlowbeatApp.copyToGiveWayTo(own: only, others: [only]))
+        XCTAssertNil(GlowbeatApp.copyToGiveWayTo(own: only, others: []))
+    }
+
     /// Xcode tells the host what it is through its environment. If a future Xcode stops,
     /// this is the test that says so, rather than the next run quietly binding the bulb
     /// port again.

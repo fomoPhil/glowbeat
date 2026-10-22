@@ -23,6 +23,7 @@ final class AppModel {
 
     enum Banner: Equatable {
         case noBulbs
+        case bulbsUnreachable
         case networkUnavailable
         case audioDenied
         case partyPaused(String)
@@ -142,6 +143,8 @@ final class AppModel {
     /// socket. macOS reports a burst of path changes while an interface settles, and
     /// rebuilding on the first one would just do it again a moment later.
     private static let networkRestartDebounce: TimeInterval = 2
+    /// While bulbs are known and none of them answer, the socket is rebuilt this often.
+    static let silentRoomReconnectInterval: TimeInterval = 300
 
     /// What Glowbeat believes a bulb should look like during a Party Mode session.
     ///
@@ -188,6 +191,8 @@ final class AppModel {
     @ObservationIgnored private var pathMonitor: NWPathMonitor?
     @ObservationIgnored private var lastPathFingerprint: String?
     @ObservationIgnored private var networkRestartTask: Task<Void, Never>?
+    /// When the socket was last rebuilt, for whatever reason. Read by the tests.
+    @ObservationIgnored private(set) var lastNetworkRestart: Date?
     /// The app's one wall clock seam, taken from the same parameter the schedule reads
     /// so a test that winds time winds it for everything at once. Only the still color's
     /// rate limiter uses it outside the schedule.
@@ -408,6 +413,10 @@ final class AppModel {
         socket.stop()
     }
 
+    /// One more scan through the socket as it is. The buttons people press call
+    /// `restartNetwork()` instead: a scan sent through a socket that has gone deaf is
+    /// never answered, and before 2026-10-22 quitting and reopening Glowbeat was the only
+    /// way back to the bulbs.
     func rescan() {
         enqueueLifecycle { [discovery] in
             await discovery.scanNow()
@@ -425,7 +434,8 @@ final class AppModel {
     /// end of this chain arms fresh ones on the new socket.
     func restartNetwork() {
         guard isServicesRunning else { return }
-        logger.log("Rebuilding the LAN socket after a wake or a network change.")
+        lastNetworkRestart = clock()
+        logger.log("Rebuilding the LAN socket.")
         enqueueLifecycle { [weak self, discovery, poller] in
             await discovery.stop()
             await poller.stop()
@@ -570,6 +580,7 @@ final class AppModel {
             return .audioDenied
         }
         if bulbs.isEmpty { return .noBulbs }
+        if !bulbs.contains(where: \.isReachable) { return .bulbsUnreachable }
         return nil
     }
 
@@ -992,13 +1003,15 @@ final class AppModel {
     // lets the phone, the Bulbs pane or the next Light transition have the room back
     // without an argument.
 
-    /// Puts one color on every reachable bulb, at the brightness the pane's slider is on.
+    /// Puts one color on every reachable bulb, at the brightness the pane's slider is on,
+    /// or at `brightness` when the caller has its own slider (the menu bar popover), which
+    /// then becomes the still brightness.
     ///
     /// Order matters and is guaranteed by one serial task: on, then the color, then the
     /// brightness. On first, because a color sent to a bulb that is off is a color nobody
     /// sees; brightness last, because the bulb applies it to whatever it is currently
     /// showing and sending it first would be a brightness applied to the old color.
-    func applyStillColor(_ color: StillColor) {
+    func applyStillColor(_ color: StillColor, brightness: Double? = nil) {
         // The light mode is told first, and on purpose. Stopping Party Mode below
         // un-suspends it, and a transition it worked out while the music was playing
         // would be flushed at the room in that same turn, landing on top of the color the
@@ -1016,6 +1029,9 @@ final class AppModel {
         identifier.cancelAll()
 
         settings.stillColorID = color.id
+        if let brightness {
+            settings.stillBrightness = StillColor.clampedBrightness(brightness)
+        }
         settingsStore.save(settings)
         appliedStillColor = color
 
@@ -1545,6 +1561,21 @@ final class AppModel {
         scenes.updateBulbs(targets)
         lightModeEngine.updateBulbs(targets)
         scheduleEngine.updateBulbs(targets)
+        reconnectIfTheRoomIsSilent(snapshot)
+    }
+
+    /// A socket can go deaf with nothing to show for it: on 2026-10-22 the Mac never
+    /// slept and the network path never changed, yet the copy that had run all night
+    /// heard no bulb until it was relaunched. So while bulbs are known and none of them
+    /// answer, the socket is rebuilt, at most every `silentRoomReconnectInterval`. A room
+    /// switched off at night costs one rebuild per interval and nothing else.
+    private func reconnectIfTheRoomIsSilent(_ snapshot: [Bulb]) {
+        guard !snapshot.isEmpty, !snapshot.contains(where: \.isReachable) else { return }
+        if let lastNetworkRestart,
+           clock().timeIntervalSince(lastNetworkRestart) < Self.silentRoomReconnectInterval {
+            return
+        }
+        restartNetwork()
     }
 
     private func applyStatus(_ update: BulbStatusUpdate) {

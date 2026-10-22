@@ -1038,6 +1038,38 @@ final class AppModelTests: XCTestCase {
         XCTAssertTrue(environment.model.bulbs.allSatisfy(\.isReachable))
     }
 
+    /// Phil, 2026-10-22: "when I step away for a while and go back to it, the lights are
+    /// no longer responsive, even on a rescan." The Mac never slept, so nothing rebuilt
+    /// the socket. Now a room where every known bulb has gone quiet says so, and the
+    /// socket is rebuilt by itself, once, not on every scan after.
+    func testARoomThatGoesSilentShowsTheBannerAndReconnectsOnce() async throws {
+        let environment = try makeModel(bulbCount: 2)
+        let model = environment.model
+        model.startServices()
+        defer { model.stopServices() }
+        await waitForBulbs(model, count: 2)
+        XCTAssertNil(model.banner)
+        XCTAssertNil(model.lastNetworkRestart)
+
+        for bulb in fakeBulbs { bulb.stop() }
+        // Each scan closes a round, and three silent rounds make a bulb unreachable.
+        let deadline = Date().addingTimeInterval(10)
+        while Date() < deadline, model.banner != .bulbsUnreachable {
+            model.rescan()
+            try? await Task.sleep(nanoseconds: 300_000_000)
+        }
+        XCTAssertEqual(model.banner, .bulbsUnreachable)
+        let reconnectedAt = try XCTUnwrap(model.lastNetworkRestart,
+                                          "The silent room never rebuilt the socket.")
+
+        for _ in 0..<5 {
+            model.rescan()
+            try? await Task.sleep(nanoseconds: 300_000_000)
+        }
+        XCTAssertEqual(model.lastNetworkRestart, reconnectedAt,
+                       "A room that stays silent rebuilt the socket again inside five minutes.")
+    }
+
     /// A socket that will not open is the whole app, so it says so. Blaming LAN Control
     /// in Govee Home for a Wi-Fi problem sends the user to the wrong place entirely.
     func testASocketThatCannotOpenReportsThatTheNetworkIsUnavailable() throws {
