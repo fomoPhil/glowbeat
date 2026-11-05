@@ -2,7 +2,8 @@ import Foundation
 
 /// The white the room sits at when nothing else is driving it.
 ///
-/// Daylight and Night are fixed temperatures the user picks outright. Auto follows the
+/// Daylight and Night are fixed temperatures the user picks outright, each set on its own
+/// slider. Auto follows the
 /// Mac: Night Shift's own on and off flag where that is readable, and sunrise and sunset
 /// where it is not. `LightModeEngine` owns the following; this is only the choice.
 enum LightMode: String, CaseIterable, Identifiable, Sendable {
@@ -17,16 +18,6 @@ enum LightMode: String, CaseIterable, Identifiable, Sendable {
         case .daylight: return "Daylight"
         case .night: return "Night"
         case .auto: return "Auto"
-        }
-    }
-
-    /// The temperature this mode asks for on its own, or nil for Auto, which has none:
-    /// it borrows Daylight's or Night's depending on the time of day.
-    var fixedKelvin: Int? {
-        switch self {
-        case .daylight: return WhiteTemperature.daylightKelvin
-        case .night: return WhiteTemperature.nightKelvin
-        case .auto: return nil
         }
     }
 }
@@ -46,6 +37,7 @@ enum WhiteTemperature {
     /// the research is whether the bulb really reaches it.
     static let maximumKelvin = 6500
 
+    /// What Night and Daylight ship on. The user can move either one.
     static let nightKelvin = 2700
     static let daylightKelvin = 6000
 

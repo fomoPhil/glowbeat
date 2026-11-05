@@ -12,6 +12,22 @@ Last updated 2026-10-22. Read this first in any new session.
   ~/Projects/glowbeat-full-history-2026-09-24.bundle.
 - The .superpowers ledger and reports stay local (gitignored).
 
+## Scene looks + Day/Night whites (2026-11-05, branch feature/scene-looks)
+- **Scenes** now have the Party palette grid plus a Custom chip, and a Brightness section
+  (Darkest / Brightest). With Custom, each slider row gets a color well: low point color and
+  high point color. Every scene works out a 0-1 level per bulb and `SceneStyle` (Effects)
+  turns it into a color. Each scene keeps its own `SceneLook` (settings key `sceneLooks`).
+  A scene with no palette of its own follows Party Mode's. Candle and Sunset ship as Custom
+  with their old colors and floors, so they look exactly as before. Speed stays shared.
+  Darkest is hidden for Color flow and Static on a palette, where it does nothing.
+- **Schedule**: Daylight and Night white sliders (2700-6500 K, 100 K steps), keys
+  `daylightKelvin` / `nightKelvin`. Moving the white in force repaints the room live.
+- **Sleep**: unchanged. Phil will check tonight whether the 22:00 sleep actually puts the
+  bulbs out (it sends LAN power off).
+- Pre-existing on main too (not from this branch): SwiftUI "no current update to enqueue
+  action to" crashes in SchedulePaneTests / SettingsSceneTests render tests, both
+  SliderTickTests, and the PartyLightModeIsolation test below.
+
 ## Latest: 1.0.1 (2026-10-22, branch fix/1.0.1)
 - **Lights going dead after a while.** Phil: "when I step away for a while and go back to it, the
   lights are no longer responsive, even on a rescan." Only quit + reopen fixed it. The Mac never

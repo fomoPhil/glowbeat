@@ -161,6 +161,31 @@ final class PartySnapshotTests: XCTestCase {
                         named: "party-confetti-light")
     }
 
+    /// The Scenes pane with custom colors, which shows every control it has, and the
+    /// Schedule pane on Auto, which shows both whites.
+    func testTheSceneAndScheduleControlsRender() throws {
+        let model = try makeModel()
+        model.setSceneCustomColors()
+        try writeHosted(ScenesPanelView(model: model, includesToggle: false)
+                            .frame(width: 764)
+                            .background(Color(red: 0x1A / 255, green: 0x1A / 255, blue: 0x1E / 255))
+                            .environment(\.colorScheme, .dark),
+                        scheme: .dark, named: "scenes-custom-dark")
+        model.setScene(kind: .colorFlow)
+        model.setScenePalette(id: Palette.ocean.id)
+        try writeHosted(ScenesPanelView(model: model, includesToggle: false)
+                            .frame(width: 764)
+                            .background(Color(red: 0xF1 / 255, green: 0xF1 / 255, blue: 0xF5 / 255))
+                            .environment(\.colorScheme, .light),
+                        scheme: .light, named: "scenes-palette-light")
+        model.setLightMode(.auto)
+        try writeHosted(SchedulePanelView(model: model, layout: .columns)
+                            .frame(width: 764)
+                            .background(Color(red: 0x1A / 255, green: 0x1A / 255, blue: 0x1E / 255))
+                            .environment(\.colorScheme, .dark),
+                        scheme: .dark, named: "schedule-auto-dark")
+    }
+
     /// Discovery crosses a real loopback socket, so this polls to a deadline and rescans
     /// rather than sleeping for a guessed interval.
     private func waitForBulbs(_ model: AppModel, count: Int) async {

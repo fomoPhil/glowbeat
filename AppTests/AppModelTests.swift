@@ -1679,6 +1679,73 @@ final class AppModelTests: XCTestCase {
                        "Someone who folds Advanced away finds it folded away next launch.")
     }
 
+    /// Each scene keeps its own colors and brightness range, and they outlive a launch.
+    func testEachSceneKeepsItsOwnLookAcrossLaunches() throws {
+        let environment = try makeModel(bulbCount: 0)
+        let model = environment.model
+        XCTAssertFalse(model.sceneLook.isCustom, "Breathe ships on a palette.")
+        XCTAssertTrue(model.settings.sceneLook(for: .candle).isCustom,
+                      "Candle ships as its own flame.")
+
+        model.setScene(kind: .breathe)
+        model.setSceneCustomColors()
+        model.setSceneLowColor(RGB(hex: 0x102030))
+        model.setSceneHighColor(RGB(hex: 0xA0B0C0))
+        model.setSceneFloor(0.2)
+        model.setSceneCeiling(0.7)
+
+        model.setScene(kind: .colorFlow)
+        model.setScenePalette(id: Palette.ocean.id)
+
+        let fresh = try relaunch().model
+        let breathe = fresh.settings.sceneLook(for: .breathe)
+        XCTAssertTrue(breathe.isCustom)
+        XCTAssertEqual(breathe.low, RGB(hex: 0x102030))
+        XCTAssertEqual(breathe.high, RGB(hex: 0xA0B0C0))
+        XCTAssertEqual(breathe.floor, 0.2, accuracy: 0.0001)
+        XCTAssertEqual(breathe.ceiling, 0.7, accuracy: 0.0001)
+        XCTAssertEqual(fresh.settings.sceneLook(for: .colorFlow).paletteID, Palette.ocean.id)
+        XCTAssertEqual(fresh.settings.sceneLook(for: .candle), .defaults(for: .candle),
+                       "A scene nobody touched still looks the way it shipped.")
+    }
+
+    func testSceneBrightnessSlidersPushEachOtherOutOfTheWay() throws {
+        let model = try makeModel(bulbCount: 0).model
+        model.setSceneCeiling(0.5)
+        model.setSceneFloor(0.8)
+        XCTAssertEqual(model.sceneLook.floor, 0.8, accuracy: 0.0001)
+        XCTAssertGreaterThanOrEqual(model.sceneLook.ceiling,
+                                    0.8 + GlowbeatSettings.minimumBrightnessSpan - 0.0001)
+
+        model.setSceneFloor(0.4, persist: false)
+        XCTAssertEqual(SettingsStore(defaults: try sharedDefaults()).load()
+                           .sceneLook(for: .breathe).floor, 0.8, accuracy: 0.0001,
+                       "Nothing should have reached the store mid drag.")
+    }
+
+    /// A scene with no palette of its own follows Party Mode's; one that picked its own
+    /// keeps it.
+    func testAScenePaletteFollowsPartyModeUntilOneIsPicked() throws {
+        let model = try makeModel(bulbCount: 0).model
+        model.setPalette(id: Palette.fire.id)
+        XCTAssertEqual(model.settings.sceneStyle(for: .breathe).palette?.id, Palette.fire.id)
+
+        model.setScenePalette(id: Palette.ice.id)
+        model.setPalette(id: Palette.neon.id)
+        XCTAssertEqual(model.settings.sceneStyle(for: .breathe).palette?.id, Palette.ice.id)
+    }
+
+    func testTheDaylightAndNightWhitesAreClampedAndRemembered() throws {
+        let model = try makeModel(bulbCount: 0).model
+        model.setWhiteTemperature(5200, for: .daylight)
+        model.setWhiteTemperature(1000, for: .night)
+        XCTAssertEqual(model.settings.nightKelvin, WhiteTemperature.minimumKelvin)
+
+        let fresh = try relaunch().model
+        XCTAssertEqual(fresh.settings.daylightKelvin, 5200)
+        XCTAssertEqual(fresh.settings.nightKelvin, WhiteTemperature.minimumKelvin)
+    }
+
     /// The speed slider is live: it changes the scene without restarting it.
     func testTheSceneSpeedIsClampedAndCanBeDraggedWithoutPersisting() async throws {
         let environment = try makeModel(bulbCount: 1)

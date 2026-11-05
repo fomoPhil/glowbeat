@@ -11,7 +11,7 @@ import Observation
 /// nor the store's: a scene and Party Mode are mutually exclusive, so whoever turns one on
 /// turns the other off.
 ///
-/// It is told which bulbs, which palette and which speed rather than reading them: the
+/// It is told which bulbs, which style and which speed rather than reading them: the
 /// model owns the settings and the bulb order, and one owner is enough.
 @MainActor
 @Observable
@@ -49,12 +49,12 @@ final class SceneCoordinator {
     /// Starts the given scene. The caller has already switched Party Mode off.
     func start(bulbs: [Bulb],
                kind: SceneKind,
-               palette: Palette,
+               style: SceneStyle,
                speed: Double,
                singleColor: Bool) {
         engine.start(bulbs: bulbs,
                      kind: kind,
-                     palette: palette,
+                     style: style,
                      speed: speed,
                      singleColor: singleColor)
     }
@@ -66,12 +66,12 @@ final class SceneCoordinator {
     /// Picking another scene while one is running swaps it live. Picking one while
     /// nothing is running only changes what the picker shows, because scenes never start
     /// themselves.
-    func setScene(_ kind: SceneKind) {
-        engine.setScene(kind)
+    func setScene(_ kind: SceneKind, style: SceneStyle) {
+        engine.setScene(kind, style: style)
     }
 
-    func setPalette(_ palette: Palette) {
-        engine.setPalette(palette)
+    func setStyle(_ style: SceneStyle) {
+        engine.setStyle(style)
     }
 
     func setSpeed(_ speed: Double) {

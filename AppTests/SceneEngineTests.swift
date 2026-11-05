@@ -130,7 +130,7 @@ final class SceneEngineTests: XCTestCase {
         let environment = try makeEnvironment(bulbCount: 1)
         environment.engine.start(bulbs: environment.bulbs,
                                  kind: .breathe,
-                                 palette: .party,
+                                 style: SceneKind.breathe.defaultStyle(palette: .party),
                                  speed: 1)
         XCTAssertEqual(environment.engine.state, .running(.breathe))
         XCTAssertEqual(environment.engine.state.kind, .breathe)
@@ -145,7 +145,7 @@ final class SceneEngineTests: XCTestCase {
         XCTAssertEqual(fakeBulbs.count, 2)
         environment.engine.start(bulbs: environment.bulbs,
                                  kind: .breathe,
-                                 palette: .party,
+                                 style: SceneKind.breathe.defaultStyle(palette: .party),
                                  speed: 1)
         run(environment, sceneSeconds: 3)
         for bulb in fakeBulbs {
@@ -169,7 +169,7 @@ final class SceneEngineTests: XCTestCase {
         }
         environment.engine.start(bulbs: environment.bulbs,
                                  kind: .candle,
-                                 palette: .party,
+                                 style: SceneKind.candle.defaultStyle(palette: .party),
                                  speed: 1)
         run(environment, sceneSeconds: 1)
 
@@ -192,7 +192,7 @@ final class SceneEngineTests: XCTestCase {
         XCTAssertEqual(fakeBulbs.count, 2)
         environment.engine.start(bulbs: environment.bulbs,
                                  kind: .fixed,
-                                 palette: .party,
+                                 style: SceneKind.fixed.defaultStyle(palette: .party),
                                  speed: 1)
         run(environment, sceneSeconds: 2)
         try await settle(0.5)
@@ -216,7 +216,7 @@ final class SceneEngineTests: XCTestCase {
         let fake = fakeBulbs[0]
         environment.engine.start(bulbs: environment.bulbs,
                                  kind: .sunset,
-                                 palette: .party,
+                                 style: SceneKind.sunset.defaultStyle(palette: .party),
                                  speed: 1)
         environment.clock.advance(by: 0.25)
         environment.ticks.fire()
@@ -241,7 +241,7 @@ final class SceneEngineTests: XCTestCase {
         let environment = try makeEnvironment(bulbCount: 1)
         environment.engine.start(bulbs: environment.bulbs,
                                  kind: .sunset,
-                                 palette: .party,
+                                 style: SceneKind.sunset.defaultStyle(palette: .party),
                                  speed: 4)
         environment.clock.advance(by: 0.25)
         environment.ticks.fire()
@@ -256,7 +256,7 @@ final class SceneEngineTests: XCTestCase {
         let fake = fakeBulbs[0]
         environment.engine.start(bulbs: environment.bulbs,
                                  kind: .breathe,
-                                 palette: .party,
+                                 style: SceneKind.breathe.defaultStyle(palette: .party),
                                  speed: 1)
         run(environment, sceneSeconds: 3)
         await waitUntil({ !recordedColors(fake).isEmpty }, message: "No scene color arrived.")
@@ -279,10 +279,10 @@ final class SceneEngineTests: XCTestCase {
         let environment = try makeEnvironment(bulbCount: 1)
         environment.engine.start(bulbs: environment.bulbs,
                                  kind: .breathe,
-                                 palette: .party,
+                                 style: SceneKind.breathe.defaultStyle(palette: .party),
                                  speed: 1)
         run(environment, sceneSeconds: 2)
-        environment.engine.setScene(.candle)
+        environment.engine.setScene(.candle, style: SceneKind.candle.defaultStyle(palette: .party))
         XCTAssertEqual(environment.engine.state, .running(.candle))
         run(environment, sceneSeconds: 1)
         environment.engine.stop()
@@ -292,7 +292,7 @@ final class SceneEngineTests: XCTestCase {
     func testSettingASceneWhileOffDoesNotStartAnything() {
         let engine = SceneEngine(controller: BulbController(socket: LANSocket(configuration: .production)),
                                  tickSource: ManualTickSource())
-        engine.setScene(.candle)
+        engine.setScene(.candle, style: SceneKind.candle.defaultStyle(palette: .party))
         XCTAssertEqual(engine.state, .off)
     }
 }

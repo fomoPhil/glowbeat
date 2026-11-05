@@ -104,6 +104,9 @@ struct GlowbeatSettings: Equatable, Sendable {
     /// Static's single color mode: one palette color for the whole room. Remembered for
     /// every scene, applied only by the one that has such a mode.
     var sceneSingleColor: Bool
+    /// Each scene's colors and brightness range, keyed by `SceneKind.rawValue`. A scene
+    /// with no entry looks the way it shipped. Read through `sceneLook(for:)`.
+    var sceneLooks: [String: SceneLook]
     /// Which still color the Colors pane is ringing, or nil until anyone has picked one.
     ///
     /// The selection, which is not the same thing as what the room is wearing: a still
@@ -146,6 +149,10 @@ struct GlowbeatSettings: Equatable, Sendable {
     /// seconds, which is far too fast for a room light, so Auto ignores that fade and
     /// runs this ramp from the moment Night Shift's own flag flips.
     var shiftLengthMinutes: Int
+    /// The white Daylight puts the room on, 2700 through 6500 K.
+    var daylightKelvin: Int
+    /// The white Night puts the room on, 2700 through 6500 K.
+    var nightKelvin: Int
     /// The wake and sleep timers.
     var schedule: ScheduleSettings
 
@@ -175,6 +182,7 @@ struct GlowbeatSettings: Equatable, Sendable {
                                            sceneKindID: SceneKind.breathe.rawValue,
                                            sceneSpeed: SceneKind.defaultSpeed,
                                            sceneSingleColor: false,
+                                           sceneLooks: [:],
                                            stillColorID: nil,
                                            stillBrightness: StillColor.defaultBrightness,
                                            showsScenesSection: true,
@@ -184,6 +192,8 @@ struct GlowbeatSettings: Equatable, Sendable {
                                            savedAdvancedDefault: nil,
                                            lightModeID: LightMode.daylight.rawValue,
                                            shiftLengthMinutes: defaultShiftLengthMinutes,
+                                           daylightKelvin: WhiteTemperature.daylightKelvin,
+                                           nightKelvin: WhiteTemperature.nightKelvin,
                                            schedule: .defaults)
 
     /// The beat sensitivity the gate implies. Reading it rather than storing it is what
@@ -273,6 +283,16 @@ struct GlowbeatSettings: Equatable, Sendable {
         set { sceneKindID = newValue.rawValue }
     }
 
+    func sceneLook(for kind: SceneKind) -> SceneLook {
+        sceneLooks[kind.rawValue] ?? .defaults(for: kind)
+    }
+
+    /// The style the scene runs with, following Party Mode's palette where it has none of
+    /// its own.
+    func sceneStyle(for kind: SceneKind) -> SceneStyle {
+        sceneLook(for: kind).style(following: palette)
+    }
+
     /// The picked color itself, or nil when nobody has picked one and when a stored id
     /// names a color this build's catalog does not have.
     var stillColor: StillColor? {
@@ -360,6 +380,9 @@ final class SettingsStore {
         static let sceneKindID = "sceneKindID"
         static let sceneSpeed = "sceneSpeed"
         static let sceneSingleColor = "sceneSingleColor"
+        static let sceneLooks = "sceneLooks"
+        static let daylightKelvin = "daylightKelvin"
+        static let nightKelvin = "nightKelvin"
         static let stillColorID = "stillColorID"
         static let stillBrightness = "stillBrightness"
         static let showsScenesSection = "showsScenesSection"
@@ -448,6 +471,22 @@ final class SettingsStore {
             settings.sceneSpeed = SceneKind.clampedSpeed(defaults.double(forKey: Key.sceneSpeed))
         }
         settings.sceneSingleColor = defaults.bool(forKey: Key.sceneSingleColor)
+        // Only kinds this build knows, and only dictionaries, so a look from a later
+        // version or a hand edit cannot leave a scene with nothing to draw.
+        if let stored = defaults.dictionary(forKey: Key.sceneLooks) {
+            for kind in SceneKind.allCases {
+                guard let values = stored[kind.rawValue] as? [String: Any] else { continue }
+                settings.sceneLooks[kind.rawValue] = SceneLook(stored: values, kind: kind)
+            }
+        }
+        if defaults.object(forKey: Key.daylightKelvin) != nil {
+            settings.daylightKelvin = WhiteTemperature.clamped(
+                defaults.integer(forKey: Key.daylightKelvin))
+        }
+        if defaults.object(forKey: Key.nightKelvin) != nil {
+            settings.nightKelvin = WhiteTemperature.clamped(
+                defaults.integer(forKey: Key.nightKelvin))
+        }
         // A color id from a hand edited plist, or from a build whose catalog had one this
         // build's does not, is dropped rather than kept: the pane would otherwise ring a
         // swatch that is not on screen.
@@ -535,6 +574,9 @@ final class SettingsStore {
         defaults.set(settings.sceneKindID, forKey: Key.sceneKindID)
         defaults.set(SceneKind.clampedSpeed(settings.sceneSpeed), forKey: Key.sceneSpeed)
         defaults.set(settings.sceneSingleColor, forKey: Key.sceneSingleColor)
+        defaults.set(settings.sceneLooks.mapValues(\.stored), forKey: Key.sceneLooks)
+        defaults.set(WhiteTemperature.clamped(settings.daylightKelvin), forKey: Key.daylightKelvin)
+        defaults.set(WhiteTemperature.clamped(settings.nightKelvin), forKey: Key.nightKelvin)
         if let stillColorID = settings.stillColorID {
             defaults.set(stillColorID, forKey: Key.stillColorID)
         } else {

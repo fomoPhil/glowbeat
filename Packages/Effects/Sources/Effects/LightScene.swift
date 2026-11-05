@@ -23,10 +23,10 @@ public enum SceneKind: String, CaseIterable, Identifiable, Hashable, Sendable {
     public var summary: String {
         switch self {
         case .breathe: return "Every bulb brightens and dims together."
-        case .colorFlow: return "The palette drifts from bulb to bulb."
-        case .candle: return "A warm flicker, different in every bulb."
-        case .sunset: return "Twenty minutes from warm white down to off."
-        case .fixed: return "One palette color per bulb, holding still."
+        case .colorFlow: return "The colors drift from bulb to bulb."
+        case .candle: return "A flicker, different in every bulb."
+        case .sunset: return "Twenty minutes from bright to dim, then off."
+        case .fixed: return "The colors laid along the bulbs, holding still."
         }
     }
 
@@ -48,11 +48,11 @@ public protocol LightScene: Sendable {
 
     /// - Parameters:
     ///   - bulbCount: how many colors to return, in the user's bulb order. Empty for zero.
-    ///   - palette: the colors to draw from, shared with Party Mode.
+    ///   - style: the colors and the brightness range to paint with.
     ///   - speed: 0.25 through 4. Multiplies the scene's own clock.
     ///   - time: seconds on a monotonic clock.
     mutating func tick(bulbCount: Int,
-                       palette: Palette,
+                       style: SceneStyle,
                        speed: Double,
                        time: TimeInterval) -> [RGB]
 
@@ -70,6 +70,17 @@ public protocol LightScene: Sendable {
 extension LightScene {
     public var progress: Double? { nil }
     public var isFinished: Bool { false }
+
+    /// The scene in its shipped style, painting with `palette` where it takes one.
+    public mutating func tick(bulbCount: Int,
+                              palette: Palette,
+                              speed: Double,
+                              time: TimeInterval) -> [RGB] {
+        tick(bulbCount: bulbCount,
+             style: kind.defaultStyle(palette: palette),
+             speed: speed,
+             time: time)
+    }
 }
 
 extension SceneKind {

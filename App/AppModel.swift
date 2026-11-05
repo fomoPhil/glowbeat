@@ -242,6 +242,8 @@ final class AppModel {
                                                source: nightShift,
                                                mode: loaded.lightMode,
                                                shiftLengthMinutes: loaded.shiftLengthMinutes,
+                                               daylightKelvin: loaded.daylightKelvin,
+                                               nightKelvin: loaded.nightKelvin,
                                                calendar: calendar)
         self.scheduleEngine = ScheduleEngine(controller: controller,
                                              ticker: scheduleTickSource,
@@ -932,7 +934,7 @@ final class AppModel {
             scheduleEngine.cancelRamp()
             scenes.start(bulbs: reachableBulbs,
                          kind: settings.sceneKind,
-                         palette: settings.palette,
+                         style: settings.sceneStyle(for: settings.sceneKind),
                          speed: settings.sceneSpeed,
                          singleColor: settings.sceneSingleColor)
         } else {
@@ -945,7 +947,61 @@ final class AppModel {
     func setScene(kind: SceneKind) {
         settings.sceneKind = kind
         settingsStore.save(settings)
-        scenes.setScene(kind)
+        scenes.setScene(kind, style: settings.sceneStyle(for: kind))
+    }
+
+    /// The look of the scene the picker is showing.
+    var sceneLook: SceneLook {
+        settings.sceneLook(for: settings.sceneKind)
+    }
+
+    /// Changes the showing scene's look and hands it to a running scene at once.
+    /// `persist` is false while a slider or a color well is being dragged.
+    private func updateSceneLook(persist: Bool = true, _ change: (inout SceneLook) -> Void) {
+        let kind = settings.sceneKind
+        var look = settings.sceneLook(for: kind)
+        change(&look)
+        settings.sceneLooks[kind.rawValue] = look
+        if persist {
+            settingsStore.save(settings)
+        }
+        scenes.setStyle(settings.sceneStyle(for: kind))
+    }
+
+    func setScenePalette(id: String) {
+        updateSceneLook { look in
+            look.paletteID = Palette.palette(withID: id).id
+            look.isCustom = false
+        }
+    }
+
+    func setSceneCustomColors() {
+        updateSceneLook { $0.isCustom = true }
+    }
+
+    func setSceneLowColor(_ color: RGB) {
+        updateSceneLook { $0.low = color }
+    }
+
+    func setSceneHighColor(_ color: RGB) {
+        updateSceneLook { $0.high = color }
+    }
+
+    /// Darkest, pushing Brightest up out of the way, the way the Party sliders do.
+    func setSceneFloor(_ value: Double, persist: Bool = true) {
+        updateSceneLook(persist: persist) { look in
+            let range = GlowbeatSettings.brightnessRange(settingFloor: value, ceiling: look.ceiling)
+            look.floor = range.floor
+            look.ceiling = range.ceiling
+        }
+    }
+
+    func setSceneCeiling(_ value: Double, persist: Bool = true) {
+        updateSceneLook(persist: persist) { look in
+            let range = GlowbeatSettings.brightnessRange(settingCeiling: value, floor: look.floor)
+            look.floor = range.floor
+            look.ceiling = range.ceiling
+        }
     }
 
     /// The window's two collapsible sections. Which ones are open is a layout choice, so
@@ -1140,6 +1196,27 @@ final class AppModel {
         lightModeStatus = lightModeEngine.status
     }
 
+    /// The white Daylight or Night puts the room on. `persist` is false while the slider is
+    /// being dragged; the room follows the drag when that white is the one in force.
+    func setWhiteTemperature(_ kelvin: Int, for mode: LightMode, persist: Bool = true) {
+        let clamped = WhiteTemperature.clamped(kelvin)
+        switch mode {
+        case .daylight: settings.daylightKelvin = clamped
+        case .night: settings.nightKelvin = clamped
+        case .auto: return
+        }
+        if persist {
+            settingsStore.save(settings)
+        }
+        // The white in force repaints the room, so a still color is no longer on it.
+        if lightModeStatus.isWarm == (mode == .night) {
+            dropAppliedStillColor()
+        }
+        lightModeEngine.setTemperatures(daylight: settings.daylightKelvin,
+                                        night: settings.nightKelvin)
+        lightModeStatus = lightModeEngine.status
+    }
+
     /// How long Auto takes to move between the two whites. `persist` is false while the
     /// slider is being dragged, like the party sliders.
     func setShiftLength(minutes: Int, persist: Bool = true) {
@@ -1228,8 +1305,8 @@ final class AppModel {
         settings.paletteID = Palette.palette(withID: id).id
         settingsStore.save(settings)
         engine.setPalette(settings.palette)
-        // Scenes draw from the same palette, so the picker moves both.
-        scenes.setPalette(settings.palette)
+        // A scene that has no palette of its own follows this one.
+        scenes.setStyle(settings.sceneStyle(for: settings.sceneKind))
     }
 
     /// The one reaction control. `persist` is false while the marker is being dragged:

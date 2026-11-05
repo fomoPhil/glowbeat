@@ -119,8 +119,7 @@ enum ScheduleFormatting {
         let white = status.isWarm ? "warm" : "cool"
         switch status.origin {
         case .fixed:
-            let kelvin = status.mode.fixedKelvin ?? status.kelvin
-            return "A \(white) white, \(kelvin) K. Nothing changes it on its own."
+            return "A \(white) white, \(status.kelvin) K. Nothing changes it on its own."
         case .nightShift:
             guard let next = status.nextChange else {
                 return "Following Night Shift: \(white)."
