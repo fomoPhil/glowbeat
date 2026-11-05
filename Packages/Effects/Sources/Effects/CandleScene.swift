@@ -1,7 +1,8 @@
 import Foundation
 
-/// A warm flicker: every bulb walks its own brightness around a 2200 K amber, between 40
-/// and 100 percent.
+/// A flicker: every bulb walks its own level between the style's low point and its high
+/// point. Ships as a 2200 K amber between 40 and 100 percent. With a palette, each bulb
+/// flickers in its own palette color, laid along the bulbs the way Static lays them.
 ///
 /// Each bulb gets its own walk, because a room of candles that all dip at the same moment
 /// reads as a power cut. The walk is mean reverting, pulled back toward a resting
@@ -50,7 +51,7 @@ public struct CandleScene: LightScene {
     }
 
     public mutating func tick(bulbCount: Int,
-                              palette: Palette,
+                              style: SceneStyle,
                               speed: Double,
                               time: TimeInterval) -> [RGB] {
         // The clock is advanced before the bulb count is considered, so a tick with no
@@ -85,7 +86,13 @@ public struct CandleScene: LightScene {
                                       max(Self.minimumBrightness, reverted + jump))
         }
 
-        return brightnesses.map { Self.flame.scaled(by: $0) }
+        let span = Self.maximumBrightness - Self.minimumBrightness
+        let colors = style.palette?.colors ?? []
+        return brightnesses.enumerated().map { index, brightness in
+            let level = (brightness - Self.minimumBrightness) / span
+            let color = colors.isEmpty ? style.fallbackColor : colors[index % colors.count]
+            return style.color(at: level, paletteColor: color)
+        }
     }
 
     public mutating func reset() {

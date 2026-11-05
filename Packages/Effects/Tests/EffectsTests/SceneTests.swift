@@ -82,7 +82,8 @@ final class SceneTests: XCTestCase {
 
         let dip = frames[frames.count / 2]
         XCTAssertEqual(Set(dip).count, 1, "Every bulb breathes together.")
-        XCTAssertEqual(dip[0], palette.dimBase)
+        XCTAssertEqual(dip[0], palette.colors[0].scaled(by: 0.1),
+                       "The dip is the same color at the shipped 10 percent floor.")
 
         let quarter = frames[frames.count / 4]
         XCTAssertGreaterThan(quarter[0].luminance, dip[0].luminance)
@@ -110,7 +111,7 @@ final class SceneTests: XCTestCase {
     func testDoubleSpeedTakesHalfAsLongToBreathe() {
         var fast = BreatheScene()
         let frames = run(&fast, bulbCount: 1, seconds: BreatheScene.breathDuration / 2, speed: 2)
-        XCTAssertEqual(frames[frames.count / 2][0], palette.dimBase,
+        XCTAssertEqual(frames[frames.count / 2][0], palette.colors[0].scaled(by: 0.1),
                        "At 2x the breath reaches its dip in half the time.")
         XCTAssertEqual(frames[frames.count - 1][0], palette.colors[1],
                        "And a whole breath, and the next color, in half the time.")
@@ -342,5 +343,79 @@ final class SceneTests: XCTestCase {
         var scene = StaticScene()
         let colors = scene.tick(bulbCount: 4, palette: single, speed: 1, time: 0)
         XCTAssertEqual(colors, Array(repeating: RGB(hex: 0x00FF00), count: 4))
+    }
+
+    // MARK: Styles
+
+    private let blue = RGB(hex: 0x0000FF)
+    private let red = RGB(hex: 0xFF0000)
+
+    private func custom(floor: Double, ceiling: Double) -> SceneStyle {
+        SceneStyle(colors: .custom(low: blue, high: red), floor: floor, ceiling: ceiling)
+    }
+
+    func testBreatheRunsBetweenTheCustomLowAndHighPoints() {
+        var scene = BreatheScene()
+        let style = custom(floor: 0.2, ceiling: 0.8)
+        let top = scene.tick(bulbCount: 1, style: style, speed: 1, time: 0)
+        let bottom = scene.tick(bulbCount: 1, style: style, speed: 1,
+                                time: BreatheScene.breathDuration / 2)
+        XCTAssertEqual(top, [red.scaled(by: 0.8)])
+        XCTAssertEqual(bottom, [blue.scaled(by: 0.2)])
+    }
+
+    func testAPaletteBreathKeepsItsColorAndDimsToTheFloor() {
+        var scene = BreatheScene()
+        let style = SceneStyle(colors: .palette(palette), floor: 0.5, ceiling: 0.9)
+        let top = scene.tick(bulbCount: 1, style: style, speed: 1, time: 0)
+        let bottom = scene.tick(bulbCount: 1, style: style, speed: 1,
+                                time: BreatheScene.breathDuration / 2)
+        XCTAssertEqual(top, [palette.colors[0].scaled(by: 0.9)])
+        XCTAssertEqual(bottom, [palette.colors[0].scaled(by: 0.5)])
+    }
+
+    func testTheStyleKeepsTheFloorUnderTheCeiling() {
+        let style = SceneStyle(colors: .palette(palette), floor: 0.9, ceiling: 0.2)
+        XCTAssertEqual(style.floor, 0.2)
+        XCTAssertEqual(style.ceiling, 0.9)
+        let wild = SceneStyle(colors: .palette(palette), floor: -1, ceiling: .nan)
+        XCTAssertEqual(wild.floor, 0)
+        XCTAssertEqual(wild.ceiling, 1)
+    }
+
+    func testCustomColorFlowAlternatesTheHighAndLowPoints() {
+        var scene = ColorFlowScene()
+        let colors = scene.tick(bulbCount: 3, style: custom(floor: 0.2, ceiling: 1),
+                                speed: 1, time: 0)
+        XCTAssertEqual(colors, [red, blue.scaled(by: 0.2), red])
+    }
+
+    func testCustomStaticAlternatesOrHoldsTheHighPoint() {
+        let style = custom(floor: 0.2, ceiling: 0.6)
+        var scene = StaticScene()
+        XCTAssertEqual(scene.tick(bulbCount: 3, style: style, speed: 1, time: 0),
+                       [red.scaled(by: 0.6), blue.scaled(by: 0.2), red.scaled(by: 0.6)])
+        var single = StaticScene(singleColor: true)
+        XCTAssertEqual(single.tick(bulbCount: 2, style: style, speed: 1, time: 0),
+                       [red.scaled(by: 0.6), red.scaled(by: 0.6)])
+    }
+
+    func testACandleInAPaletteFlickersInEachBulbsOwnColor() {
+        var scene = CandleScene(generator: SeededGenerator(seed: 7))
+        let style = SceneStyle(colors: .palette(palette), floor: 0, ceiling: 1)
+        let colors = scene.tick(bulbCount: 2, style: style, speed: 1, time: 0)
+        // A steady start sits at the resting brightness, half way up the walk.
+        XCTAssertLessThanOrEqual(colors[0].channelDistance(to: palette.colors[0].scaled(by: 0.5)), 1)
+        XCTAssertLessThanOrEqual(colors[1].channelDistance(to: palette.colors[1].scaled(by: 0.5)), 1)
+    }
+
+    func testASunsetInAPaletteWalksFromTheFirstColorToTheLast() {
+        var scene = SunsetScene()
+        let style = SceneStyle(colors: .palette(palette), floor: 0.3, ceiling: 1)
+        XCTAssertEqual(scene.tick(bulbCount: 1, style: style, speed: 1, time: 0),
+                       [palette.colors[0]])
+        let end = scene.tick(bulbCount: 1, style: style, speed: 1,
+                             time: SunsetScene.duration - 0.001)
+        XCTAssertEqual(end[0], palette.colors[palette.colors.count - 1].scaled(by: 0.3))
     }
 }

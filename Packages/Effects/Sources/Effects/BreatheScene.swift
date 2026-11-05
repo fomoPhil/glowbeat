@@ -1,8 +1,8 @@
 import Foundation
 
-/// Every bulb brightens and dims together between the palette's dim base and one palette
-/// color: one full breath every six seconds at 1x, and the next palette color each time
-/// the breath comes back around.
+/// Every bulb brightens and dims together between the style's low point and its high
+/// point: one full breath every six seconds at 1x. With a palette, the next palette color
+/// each time the breath comes back around.
 ///
 /// It starts at the top and breathes out first. Switching the scene on usually happens in
 /// a room whose bulbs are already lit, so opening with a dim reads as the scene taking
@@ -27,7 +27,7 @@ public struct BreatheScene: LightScene {
     public init() {}
 
     public mutating func tick(bulbCount: Int,
-                              palette: Palette,
+                              style: SceneStyle,
                               speed: Double,
                               time: TimeInterval) -> [RGB] {
         _ = clock.advance(to: time, speed: speed)
@@ -35,18 +35,20 @@ public struct BreatheScene: LightScene {
 
         let breath = Int(phase)
         while breathsTaken <= breath {
-            cursor.advance(in: palette)
+            if let palette = style.palette {
+                cursor.advance(in: palette)
+            }
             breathsTaken += 1
         }
 
         let count = max(0, bulbCount)
         guard count > 0 else { return [] }
 
-        // Starts at the palette color and breathes out, so switching the scene on in a lit
+        // Starts at the high point and breathes out, so switching the scene on in a lit
         // room is a dim rather than a drop.
-        let amount = (1 + cos(phase * 2 * .pi)) / 2
-        let color = palette.dimBase.blended(with: cursor.color(in: palette), amount: amount)
-        return Array(repeating: color, count: count)
+        let level = (1 + cos(phase * 2 * .pi)) / 2
+        let color = style.palette.map { cursor.color(in: $0) } ?? style.fallbackColor
+        return Array(repeating: style.color(at: level, paletteColor: color), count: count)
     }
 
     public mutating func reset() {

@@ -24,8 +24,7 @@ struct SchedulePanelView: View {
         + "lights catch up when it wakes."
     static let bulbPowerNote = "Bulbs need power to wake. Keep their switch on."
 
-    static let lightModeCaption = "Daylight is a cool white for the day. Night is a warm "
-        + "white that keeps you sleepy. Auto follows your Mac."
+    static let lightModeCaption = "Auto follows your Mac. Lower is a warmer white."
 
     private static let modeSegments: [PartySegment<LightMode>] =
         LightMode.allCases.map { PartySegment(value: $0, title: $0.displayName) }
@@ -95,6 +94,15 @@ struct SchedulePanelView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityLabel("Now: \(model.lightModeCaption)")
 
+                // The white each mode puts the room on. Auto moves between both, so it
+                // shows both.
+                if model.lightMode != .night {
+                    whiteSlider(for: .daylight, kelvin: model.settings.daylightKelvin)
+                }
+                if model.lightMode != .daylight {
+                    whiteSlider(for: .night, kelvin: model.settings.nightKelvin)
+                }
+
                 // Auto is the only mode that moves between two whites, so the slider that
                 // says how slowly appears with it, the way Travel appears with Wave.
                 if model.lightMode == .auto {
@@ -117,6 +125,18 @@ struct SchedulePanelView: View {
                 }
             }
         }
+    }
+
+    private func whiteSlider(for mode: LightMode, kelvin: Int) -> some View {
+        LabeledValueSlider(title: mode.displayName,
+                           value: Double(kelvin),
+                           range: Double(WhiteTemperature.minimumKelvin)...Double(WhiteTemperature.maximumKelvin),
+                           snapsTo: 100,
+                           accessibilityLabel: "\(mode.displayName) white, warm to cool",
+                           format: { "\(Int($0.rounded())) K" },
+                           onChange: { model.setWhiteTemperature(Int($0.rounded()), for: mode,
+                                                                 persist: false) },
+                           onCommit: { model.setWhiteTemperature(Int($0.rounded()), for: mode) })
     }
 
     // MARK: Schedule

@@ -1,7 +1,8 @@
 import Foundation
 
-/// Twenty minutes at 1x from a bright warm white down through deep orange, ending with
-/// the bulbs off.
+/// Twenty minutes at 1x from the style's high point down to its low point, ending with
+/// the bulbs off. Ships as a bright warm white down through deep orange. With a palette,
+/// the color walks the palette from its first color to its last.
 ///
 /// The one scene with an end. `progress` drives the bar in the Scenes section, and
 /// `isFinished` is what tells the engine to switch the bulbs off and put the control back
@@ -34,7 +35,7 @@ public struct SunsetScene: LightScene {
     }
 
     public mutating func tick(bulbCount: Int,
-                              palette: Palette,
+                              style: SceneStyle,
                               speed: Double,
                               time: TimeInterval) -> [RGB] {
         _ = clock.advance(to: time, speed: speed)
@@ -43,9 +44,19 @@ public struct SunsetScene: LightScene {
         guard count > 0 else { return [] }
 
         let walked = progress ?? 0
-        let color = Self.warmWhite.blended(with: Self.deepOrange, amount: walked)
-        let brightness = 1 - (1 - Self.finalBrightness) * walked
-        return Array(repeating: color.scaled(by: brightness), count: count)
+        let color = style.color(at: 1 - walked, paletteColor: paletteColor(walked, style))
+        return Array(repeating: color, count: count)
+    }
+
+    /// The palette from its first color to its last, `walked` of the way along.
+    private func paletteColor(_ walked: Double, _ style: SceneStyle) -> RGB {
+        guard let colors = style.palette?.colors, !colors.isEmpty else {
+            return style.fallbackColor
+        }
+        let position = walked * Double(colors.count - 1)
+        let index = min(colors.count - 1, Int(position))
+        let next = min(colors.count - 1, index + 1)
+        return colors[index].blended(with: colors[next], amount: position - Double(index))
     }
 
     public mutating func reset() {

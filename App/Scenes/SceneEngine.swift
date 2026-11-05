@@ -43,7 +43,7 @@ final class SceneEngine {
 
     private var bulbs: [Bulb] = []
     private var scene: any LightScene = SceneKind.breathe.makeScene()
-    private var palette: Palette = .party
+    private var style: SceneStyle = SceneKind.breathe.defaultStyle(palette: .party)
     private var speed: Double = SceneKind.defaultSpeed
     /// Static's single color mode, kept here so switching scene and back does not lose it.
     private var singleColor = false
@@ -67,11 +67,11 @@ final class SceneEngine {
 
     func start(bulbs: [Bulb],
                kind: SceneKind,
-               palette: Palette,
+               style: SceneStyle,
                speed: Double,
                singleColor: Bool = false) {
         self.bulbs = bulbs
-        self.palette = palette
+        self.style = style
         self.speed = SceneKind.clampedSpeed(speed)
         self.singleColor = singleColor
         self.scene = kind.makeScene(singleColor: singleColor)
@@ -118,8 +118,9 @@ final class SceneEngine {
     // MARK: Live adjustments
 
     /// Switches to another scene without stopping: the new scene starts from its own
-    /// beginning, which is what makes Breathe open at the dim base rather than mid breath.
-    func setScene(_ kind: SceneKind) {
+    /// beginning, which is what makes Breathe open at the top rather than mid breath.
+    func setScene(_ kind: SceneKind, style: SceneStyle) {
+        self.style = style
         scene = kind.makeScene(singleColor: singleColor)
         deduper.reset()
         setProgress(nil)
@@ -137,8 +138,10 @@ final class SceneEngine {
         deduper.reset()
     }
 
-    func setPalette(_ palette: Palette) {
-        self.palette = palette
+    /// Live, so dragging Darkest or picking a color shows on the bulbs as it happens.
+    func setStyle(_ style: SceneStyle) {
+        guard style != self.style else { return }
+        self.style = style
         deduper.reset()
     }
 
@@ -186,7 +189,7 @@ final class SceneEngine {
         let tickTime = Date()
         let now = clock()
         let colors = scene.tick(bulbCount: bulbs.count,
-                                palette: palette,
+                                style: style,
                                 speed: speed,
                                 time: now)
 

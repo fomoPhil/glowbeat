@@ -59,9 +59,8 @@ final class ScheduleModelTests: XCTestCase {
     }
 
     func testTheTwoModeTemperaturesAreInsideTheClamp() {
-        XCTAssertEqual(LightMode.night.fixedKelvin, 2700)
-        XCTAssertEqual(LightMode.daylight.fixedKelvin, 6000)
-        XCTAssertNil(LightMode.auto.fixedKelvin)
+        XCTAssertEqual(WhiteTemperature.nightKelvin, 2700)
+        XCTAssertEqual(WhiteTemperature.daylightKelvin, 6000)
         XCTAssertEqual(WhiteTemperature.clamped(WhiteTemperature.daylightKelvin), 6000)
         XCTAssertEqual(WhiteTemperature.clamped(WhiteTemperature.nightKelvin), 2700)
     }

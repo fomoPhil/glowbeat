@@ -252,7 +252,19 @@ struct PartySliders: View {
 /// colors stop being readable.
 struct PalettePicker: View {
 
+    /// The two colors a Custom chip shows, for a picker that offers one.
+    struct Custom {
+        var low: Color
+        var high: Color
+    }
+
+    /// The selection a Custom chip stands for.
+    static let customID = "custom"
+
     let selection: String
+    /// Set by the Scenes pane, which can paint with two colors of its own as well as a
+    /// palette. Party Mode has no custom colors, so it passes nil and shows ten chips.
+    var custom: Custom?
     let onSelect: (String) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -267,26 +279,35 @@ struct PalettePicker: View {
     var body: some View {
         LazyVGrid(columns: Self.columns, alignment: .leading, spacing: 8) {
             ForEach(Palette.all) { palette in
-                Button {
-                    onSelect(palette.id)
-                } label: {
-                    chip(for: palette)
-                }
-                .buttonStyle(PartyPressStyle())
-                .help(palette.name)
-                .accessibilityLabel(palette.name)
-                .accessibilityAddTraits(palette.id == selection ? [.isSelected] : [])
+                button(id: palette.id,
+                       name: palette.name,
+                       colors: palette.colors.map { Color(effectsRGB: $0) })
+            }
+            if let custom {
+                button(id: Self.customID, name: "Custom", colors: [custom.low, custom.high])
             }
         }
         .animation(PartyStyle.motion(PartyStyle.quick, reduceMotion: reduceMotion),
                    value: selection)
     }
 
-    private func chip(for palette: Palette) -> some View {
-        let isSelected = palette.id == selection
+    private func button(id: String, name: String, colors: [Color]) -> some View {
+        Button {
+            onSelect(id)
+        } label: {
+            chip(id: id, name: name, colors: colors)
+        }
+        .buttonStyle(PartyPressStyle())
+        .help(name)
+        .accessibilityLabel(name)
+        .accessibilityAddTraits(id == selection ? [.isSelected] : [])
+    }
+
+    private func chip(id: String, name: String, colors: [Color]) -> some View {
+        let isSelected = id == selection
         return VStack(spacing: 6) {
             Capsule()
-                .fill(LinearGradient(colors: palette.colors.map { Color(effectsRGB: $0) },
+                .fill(LinearGradient(colors: colors,
                                      startPoint: .leading,
                                      endPoint: .trailing))
                 .frame(height: Self.swatchHeight)
@@ -294,7 +315,7 @@ struct PalettePicker: View {
                 // edge against a pale window.
                 .overlay { Capsule().strokeBorder(.black.opacity(0.14), lineWidth: 1) }
                 .partyShadows(PartyStyle.liftShadows(colorScheme))
-            Text(palette.name)
+            Text(name)
                 .font(PartyStyle.caption)
                 .fontWeight(isSelected ? .semibold : .regular)
                 .foregroundStyle(isSelected ? AnyShapeStyle(PartyStyle.accent)

@@ -59,6 +59,8 @@ final class LightModeEngine {
     private let logger = Logger(subsystem: "com.philwoolley.glowbeat", category: "LightMode")
 
     private var mode: LightMode
+    private var daylightKelvin: Int
+    private var nightKelvin: Int
     private var shiftLength: TimeInterval
     private var bulbs: [Bulb] = []
     private var shift: LightRamp?
@@ -86,13 +88,17 @@ final class LightModeEngine {
          source: (any NightShiftSource)?,
          mode: LightMode = GlowbeatSettings.defaults.lightMode,
          shiftLengthMinutes: Int = GlowbeatSettings.defaultShiftLengthMinutes,
+         daylightKelvin: Int = WhiteTemperature.daylightKelvin,
+         nightKelvin: Int = WhiteTemperature.nightKelvin,
          calendar: Calendar = .current) {
         self.controller = controller
         self.source = source
         self.mode = mode
+        self.daylightKelvin = WhiteTemperature.clamped(daylightKelvin)
+        self.nightKelvin = WhiteTemperature.clamped(nightKelvin)
         self.shiftLength = TimeInterval(GlowbeatSettings.clampedShiftLengthMinutes(shiftLengthMinutes)) * 60
         self.calendar = calendar
-        self.kelvin = mode.fixedKelvin ?? WhiteTemperature.daylightKelvin
+        self.kelvin = mode == .night ? self.nightKelvin : self.daylightKelvin
         self.status = Status(mode: mode,
                              origin: mode == .auto ? .unavailable : .fixed,
                              isWarm: mode == .night,
@@ -131,6 +137,20 @@ final class LightModeEngine {
         lastResolution = resolution
         apply(kelvin: targetKelvin(for: resolution), force: true)
         publish(resolution, at: now)
+    }
+
+    /// The two whites. The room takes the new one at once if it is the one in force, the
+    /// way picking a mode does, so dragging the slider shows on the bulbs as it moves.
+    func setTemperatures(daylight: Int, night: Int) {
+        let newDaylight = WhiteTemperature.clamped(daylight)
+        let newNight = WhiteTemperature.clamped(night)
+        guard newDaylight != daylightKelvin || newNight != nightKelvin else { return }
+        daylightKelvin = newDaylight
+        nightKelvin = newNight
+        guard let resolution = lastResolution else { return }
+        shift = nil
+        apply(kelvin: targetKelvin(for: resolution), force: false)
+        publish(resolution, at: Date())
     }
 
     /// Takes effect on the next transition. A shift already running keeps the length it
@@ -240,7 +260,7 @@ final class LightModeEngine {
     // MARK: Resolution
 
     private func targetKelvin(for resolution: Resolution) -> Int {
-        resolution.isWarm ? WhiteTemperature.nightKelvin : WhiteTemperature.daylightKelvin
+        resolution.isWarm ? nightKelvin : daylightKelvin
     }
 
     private func resolve(at now: Date) -> Resolution {

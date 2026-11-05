@@ -103,6 +103,31 @@ final class LightModeEngineTests: XCTestCase {
         XCTAssertFalse(environment.engine.status.isShifting)
     }
 
+    func testMovingTheWhiteInForceRepaintsTheRoomAndTheOtherOneDoesNot() async throws {
+        let environment = try makeEnvironment(mode: .night)
+        environment.engine.reconcile(at: Date())
+
+        environment.engine.setTemperatures(daylight: 5000, night: 2700)
+        try await Task.sleep(nanoseconds: 120_000_000)
+        XCTAssertTrue(recordedTemperatures(fakeBulbs[0]).isEmpty,
+                      "Daylight is not in force at night, so nothing goes out.")
+
+        environment.engine.setTemperatures(daylight: 5000, night: 3200)
+        await waitForTemperatures(1)
+        XCTAssertEqual(recordedTemperatures(fakeBulbs[0]), [3200])
+        XCTAssertEqual(environment.engine.kelvin, 3200)
+
+        environment.engine.setMode(.daylight, at: Date())
+        await waitForTemperatures(2)
+        XCTAssertEqual(recordedTemperatures(fakeBulbs[0]).last, 5000,
+                       "Daylight lands on the white it was set to.")
+    }
+
+    func testTheWhitesAreClampedToWhatTheBulbCanShow() {
+        XCTAssertEqual(WhiteTemperature.clamped(9000), WhiteTemperature.maximumKelvin)
+        XCTAssertEqual(WhiteTemperature.clamped(1000), WhiteTemperature.minimumKelvin)
+    }
+
     func testLaunchingAdoptsTheAnswerWithoutRepaintingTheRoom() async throws {
         let environment = try makeEnvironment(mode: .auto)
         environment.nightShift.status = .scripted(enabled: true, mode: .none)
